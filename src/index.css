@@ -1,0 +1,170 @@
+@import 'tailwindcss';
+
+/* GoldenFace design tokens — Premium Beauty Tech: ivory paper, charcoal ink, champagne gold. */
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, 'Times New Roman', serif;
+
+  --color-ivory: #faf8f4;
+  --color-paper: #ffffff;
+  --color-ink: #14161f;
+  --color-navy: #1b2540;
+  --color-navy-soft: #2a3556;
+  --color-muted: #5a5f6e;
+  --color-line: #e6e1d6;
+  --color-line-strong: #d6cfbf;
+
+  --color-champagne-50: #faf5ea;
+  --color-champagne-100: #f4ebd9;
+  --color-champagne-200: #ebdcbb;
+  --color-champagne-300: #e3cfa3;
+  --color-champagne-400: #d4b87e;
+  --color-champagne-500: #c4a262;
+  --color-champagne-600: #a8864a;
+  --color-champagne-700: #7a5e24;
+
+  --radius-card: 1.25rem;
+  --radius-panel: 1.5rem;
+
+  --shadow-soft: 0 1px 2px rgb(20 22 31 / 0.04), 0 10px 30px -14px rgb(20 22 31 / 0.14);
+  --shadow-lift: 0 2px 4px rgb(20 22 31 / 0.05), 0 24px 48px -20px rgb(20 22 31 / 0.22);
+
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-fade-up: fade-up 0.7s var(--ease-soft) both;
+  --animate-fade-in: fade-in 0.5s var(--ease-soft) both;
+  --animate-shimmer: shimmer 1.8s linear infinite;
+  --animate-draw: draw 2.2s var(--ease-soft) forwards;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes shimmer {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
+@utility container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 72rem;
+  padding-inline: 1rem;
+  @media (min-width: 40rem) {
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 64rem) {
+    padding-inline: 2rem;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-ivory);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-champagne-700);
+    outline-offset: 3px;
+    border-radius: 0.375rem;
+  }
+  ::selection {
+    background-color: var(--color-champagne-200);
+    color: var(--color-ink);
+  }
+  button,
+  [role='button'],
+  summary {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Printing the report: keep only the analysis content. */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  body {
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+  }
+  .print-avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  * {
+    box-shadow: none !important;
+    animation: none !important;
+  }
+}
+.print-only {
+  display: none;
+}
