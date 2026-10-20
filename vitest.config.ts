@@ -13,6 +13,9 @@ export default defineConfig({
     setupFiles: ['./src/tests/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
     css: false,
+    // Some component tests click through a whole results page; shared CI runners can be several times
+    // slower than a laptop, and the default 5 s made them fail at random.
+    testTimeout: 20_000,
     restoreMocks: true,
     unstubGlobals: true,
   },
