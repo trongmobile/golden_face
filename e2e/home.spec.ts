@@ -4,7 +4,7 @@ import { expectNoHorizontalOverflow, isExternal, trackRequests } from './helpers
 test.describe('home page', () => {
   test('shows the headline, description and both calls to action', async ({ page }) => {
     await page.goto('/')
-    await expect(page).toHaveTitle('GoldenFace — Facial Proportion Analyzer')
+    await expect(page).toHaveTitle('GoldenFace — Golden Ratio Face Analyzer')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Discover the Geometry of Your Face')
     await expect(page.getByText('Explore facial proportions through the mathematics of the golden ratio.')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Upload Photo' }).first()).toBeVisible()
@@ -51,7 +51,7 @@ test.describe('home page', () => {
       ['Analysis', 'Analyze a Photo — GoldenFace', '/analysis'],
       ['About Golden Ratio', 'About the Golden Ratio — GoldenFace', '/about'],
       ['Privacy', 'Privacy Policy — GoldenFace', '/privacy'],
-      ['Home', 'GoldenFace — Facial Proportion Analyzer', '/'],
+      ['Home', 'GoldenFace — Golden Ratio Face Analyzer', '/'],
     ] as const) {
       if (isMobile) await page.getByRole('button', { name: 'Open menu' }).click()
       await page.getByRole('navigation', { name: isMobile ? 'Mobile' : 'Primary' }).getByRole('link', { name }).click()

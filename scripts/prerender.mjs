@@ -4,6 +4,7 @@
 //
 //   VITE_BASE_PATH  where the site is served from ("/" for a domain, "/repo/" for a project page)
 //   VITE_SITE_URL   public URL without trailing slash; enables canonical/hreflang/JSON-LD and the sitemap
+import { execFileSync } from 'node:child_process'
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -44,7 +45,17 @@ for (const lang of server.PAGE_LANGS) {
 }
 
 await writeFile(join(dist, 'robots.txt'), server.buildRobots(siteUrl || undefined))
-if (siteUrl) await writeFile(join(dist, 'sitemap.xml'), server.buildSitemap(siteUrl))
+// The date of the last commit, so a redeploy of unchanged content does not look like an update.
+// Without git (a source archive) the sitemap simply has no <lastmod>.
+function lastCommitDate() {
+  try {
+    const date = execFileSync('git', ['log', '-1', '--format=%cs'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+    return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : undefined
+  } catch {
+    return undefined
+  }
+}
+if (siteUrl) await writeFile(join(dist, 'sitemap.xml'), server.buildSitemap(siteUrl, lastCommitDate()))
 
 await rm(ssrDir, { recursive: true, force: true })
 console.log(`prerendered ${pages} pages${siteUrl ? `, sitemap.xml for ${siteUrl}` : ' (no VITE_SITE_URL: canonical links and sitemap skipped)'}`)

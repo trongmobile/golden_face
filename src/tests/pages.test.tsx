@@ -127,7 +127,7 @@ describe('layout and navigation', () => {
   it('updates the document title for each page', async () => {
     const user = userEvent.setup()
     renderApp('/')
-    expect(document.title).toBe('GoldenFace — Facial Proportion Analyzer')
+    expect(document.title).toBe('GoldenFace — Golden Ratio Face Analyzer')
     await user.click(within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { name: 'About Golden Ratio' }))
     expect(document.title).toBe('About the Golden Ratio — GoldenFace')
   })
@@ -205,7 +205,7 @@ describe('Vietnamese pages', () => {
     expect(screen.getByRole('heading', { name: /ba bước/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Công cụ này không thể cho bạn biết điều gì' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /Hình minh họa đường viền khuôn mặt/ })).toBeInTheDocument()
-    expect(document.title).toBe('GoldenFace — Phân tích tỷ lệ khuôn mặt')
+    expect(document.title).toBe('GoldenFace — Phân tích tỷ lệ vàng khuôn mặt')
     expect(document.documentElement.lang).toBe('vi')
     // The headline claim must survive translation: no beauty score.
     expect(screen.queryByText(/Discover the Geometry/)).not.toBeInTheDocument()

@@ -1,9 +1,9 @@
 import type { home as en } from '../en/home'
 
 export const home: typeof en = {
-  metaTitle: 'GoldenFace — Phân tích tỷ lệ khuôn mặt',
+  metaTitle: 'GoldenFace — Phân tích tỷ lệ vàng khuôn mặt',
   metaDescription:
-    'Khám phá tỷ lệ khuôn mặt qua toán học của tỷ lệ vàng. Phân tích điểm mốc riêng tư ngay trong trình duyệt — một sự tò mò về hình học, không phải thước đo của cái đẹp.',
+    'Phân tích tỷ lệ vàng khuôn mặt miễn phí từ một bức ảnh, riêng tư ngay trong trình duyệt. Một sự tò mò về hình học, không phải thước đo của cái đẹp.',
   illustration: {
     label:
       'Hình minh họa đường viền khuôn mặt nằm trong hình chữ nhật vàng, cùng đường xoắn ốc vàng và các đường đo',

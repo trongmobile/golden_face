@@ -3,13 +3,13 @@ import { expect, test } from '@playwright/test'
 test.describe('SEO and static hosting', () => {
   test('the document has a title, description, Open Graph and Twitter metadata', async ({ page }) => {
     await page.goto('/')
-    await expect(page).toHaveTitle('GoldenFace — Facial Proportion Analyzer')
+    await expect(page).toHaveTitle('GoldenFace — Golden Ratio Face Analyzer')
     const meta = (selector: string) => page.locator(`head meta[${selector}]`).getAttribute('content')
     const description = (await meta('name="description"'))!
     expect(description).toMatch(/facial proportions/i)
     expect(description).not.toMatch(/beauty (score|rating)|attractiveness score|measure.*beauty objectively/i)
     expect(description).toMatch(/not a measure of beauty/i)
-    expect(await meta('property="og:title"')).toBe('GoldenFace — Facial Proportion Analyzer')
+    expect(await meta('property="og:title"')).toBe('GoldenFace — Golden Ratio Face Analyzer')
     expect(await meta('property="og:description"')).toBeTruthy()
     expect(await meta('property="og:type"')).toBe('website')
     expect(await meta('name="twitter:card"')).toBe('summary_large_image')

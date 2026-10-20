@@ -4,7 +4,7 @@ export const analysisPage: typeof en = {
   meta: {
     title: 'Phân tích ảnh — GoldenFace',
     description:
-      'Tải lên hoặc chụp một ảnh chính diện và đo tỷ lệ khuôn mặt hoàn toàn trên thiết bị của bạn. Không có gì được tải lên.',
+      'Tải lên hoặc chụp một ảnh chính diện và so sánh tỷ lệ khuôn mặt với tỷ lệ vàng, hoàn toàn trên thiết bị của bạn. Không có gì được tải lên.',
   },
   select: {
     eyebrow: 'Phân tích',

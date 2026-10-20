@@ -160,6 +160,12 @@ describe('sitemap and robots', () => {
     expect(block).toContain(`hreflang="x-default" href="${SITE}/about/"`)
   })
 
+  it('adds lastmod to every page only when a date is given', () => {
+    expect(sitemap).not.toContain('<lastmod>')
+    const dated = buildSitemap(SITE, '2026-10-20')
+    expect(dated.match(/<lastmod>2026-10-20<\/lastmod>/g)).toHaveLength(ROUTES.length * PAGE_LANGS.length)
+  })
+
   it('points robots.txt at the sitemap only when there is one', () => {
     expect(buildRobots(SITE)).toBe(`User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`)
     expect(buildRobots()).toBe('User-agent: *\nAllow: /\n')

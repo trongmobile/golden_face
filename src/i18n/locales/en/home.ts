@@ -1,7 +1,7 @@
 export const home = {
-  metaTitle: 'GoldenFace — Facial Proportion Analyzer',
+  metaTitle: 'GoldenFace — Golden Ratio Face Analyzer',
   metaDescription:
-    'Explore facial proportions through the mathematics of the golden ratio. Private, in-browser landmark analysis — a geometric curiosity, not a measure of beauty.',
+    'Free golden ratio face analyzer: measure your facial proportions from a photo, privately in your browser. A geometric curiosity, not a measure of beauty.',
   illustration: {
     label:
       'Illustration of a face outline inside a golden rectangle, with the golden spiral and measurement lines',

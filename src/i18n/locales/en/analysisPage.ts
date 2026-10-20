@@ -2,7 +2,7 @@ export const analysisPage = {
   meta: {
     title: 'Analyze a Photo — GoldenFace',
     description:
-      'Upload or capture a front-facing photo and measure facial proportions entirely on your device. Nothing is uploaded.',
+      'Upload or capture a front-facing photo and compare your facial proportions with the golden ratio, entirely on your device. Nothing is uploaded.',
   },
   select: {
     eyebrow: 'Analysis',

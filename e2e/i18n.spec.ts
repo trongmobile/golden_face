@@ -24,7 +24,7 @@ test.describe('languages have their own addresses', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'vi')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Khám phá hình học trên khuôn mặt bạn')
     await expect(page.getByRole('link', { name: 'Tải ảnh lên' }).first()).toBeVisible()
-    await expect(page).toHaveTitle('GoldenFace — Phân tích tỷ lệ khuôn mặt')
+    await expect(page).toHaveTitle('GoldenFace — Phân tích tỷ lệ vàng khuôn mặt')
     await expect(page.getByRole('button', { name: /Tiếng Việt/ })).toHaveAttribute('aria-pressed', 'true')
 
     await page.getByRole('button', { name: /English/ }).click()
@@ -93,8 +93,8 @@ test.describe('languages have their own addresses', () => {
 
 test.describe('pages arrive with their content already in place', () => {
   const PAGES: [path: string, lang: string, title: string, h1: string][] = [
-    ['/', 'en', 'GoldenFace — Facial Proportion Analyzer', 'Discover the Geometry of Your Face'],
-    ['/vi/', 'vi', 'GoldenFace — Phân tích tỷ lệ khuôn mặt', 'Khám phá hình học trên khuôn mặt bạn'],
+    ['/', 'en', 'GoldenFace — Golden Ratio Face Analyzer', 'Discover the Geometry of Your Face'],
+    ['/vi/', 'vi', 'GoldenFace — Phân tích tỷ lệ vàng khuôn mặt', 'Khám phá hình học trên khuôn mặt bạn'],
     ['/about/', 'en', 'About the Golden Ratio — GoldenFace', 'A famous number, and an honest look at its limits'],
     ['/vi/about/', 'vi', 'Về tỷ lệ vàng — GoldenFace', 'Một con số nổi tiếng, và cái nhìn trung thực về giới hạn của nó'],
     ['/analysis/', 'en', 'Analyze a Photo — GoldenFace', 'Analyze a photo'],

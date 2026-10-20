@@ -125,8 +125,9 @@ export function applyPage(template: string, { lang, route, body, siteUrl }: Page
   return html
 }
 
-/** sitemap.xml listing every page in every language, each with its alternates. */
-export function buildSitemap(siteUrl: string): string {
+/** sitemap.xml listing every page in every language, each with its alternates. `lastmod` is a `YYYY-MM-DD` date. */
+export function buildSitemap(siteUrl: string, lastmod?: string): string {
+  const modified = lastmod ? `\n    <lastmod>${escapeHtml(lastmod)}</lastmod>` : ''
   const entries = ROUTES.flatMap((route) =>
     PAGE_LANGS.map((lang) => {
       const url = (code: Lang) => escapeHtml(pageUrl(siteUrl, code, route))
@@ -134,7 +135,7 @@ export function buildSitemap(siteUrl: string): string {
         ...PAGE_LANGS.map((code) => `    <xhtml:link rel="alternate" hreflang="${code}" href="${url(code)}"/>`),
         `    <xhtml:link rel="alternate" hreflang="x-default" href="${url(DEFAULT_LANG)}"/>`,
       ].join('\n')
-      return `  <url>\n    <loc>${url(lang)}</loc>\n${alternates}\n    <changefreq>monthly</changefreq>\n  </url>`
+      return `  <url>\n    <loc>${url(lang)}</loc>\n${alternates}${modified}\n    <changefreq>monthly</changefreq>\n  </url>`
     }),
   )
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${entries.join('\n')}\n</urlset>\n`
