@@ -1,4 +1,7 @@
 export { I18nProvider } from './I18nProvider'
+export { RoutedI18nProvider } from './RoutedI18nProvider'
+export { Link, NavLink } from './links'
+export { langFromPath, localizeTo, stripLang, withLang } from './paths'
 export { useI18n, type I18n } from './context'
 export { DEFAULT_LANG, LANGUAGES, detectLang, englishT, isLang, msg, translate } from './translate'
 export type { Dict, Lang, ListKey, Msg, MsgKey, Params, Translate } from './types'

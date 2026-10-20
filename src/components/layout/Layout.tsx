@@ -1,14 +1,17 @@
 import { Suspense, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/Skeleton'
-import { useI18n } from '@/i18n'
+import { stripLang, useI18n } from '@/i18n'
 import { trackPageview } from '@/utils/analytics'
 import { Footer } from './Footer'
 import { Header } from './Header'
+import { LanguageSuggestion } from './LanguageSuggestion'
 
 /** Scrolls to the top (or to a #hash target) and moves focus to <main> after navigation. */
 function useRouteEffects(mainRef: React.RefObject<HTMLElement | null>) {
   const { pathname, hash } = useLocation()
+  // Switching language keeps the same page, so it must not scroll to the top or move focus.
+  const route = stripLang(pathname)
   const first = useRef(true)
 
   useEffect(() => {
@@ -27,7 +30,7 @@ function useRouteEffects(mainRef: React.RefObject<HTMLElement | null>) {
     const main = mainRef.current
     if (main && document.activeElement !== main && main.contains(document.activeElement)) return
     main?.focus({ preventScroll: true })
-  }, [pathname, hash, mainRef])
+  }, [route, hash, mainRef])
 }
 
 /** Counts every page the visitor opens (the app never reloads, so the script cannot see them itself). */
@@ -60,6 +63,7 @@ export function Layout() {
       >
         {t('layout.skipToMain')}
       </a>
+      <LanguageSuggestion />
       <Header />
       <main id="main" ref={mainRef} tabIndex={-1} className="flex-1 outline-none">
         <Suspense fallback={<PageFallback />}>

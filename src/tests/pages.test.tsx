@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { Suspense } from 'react'
 import { describe, expect, it } from 'vitest'
 import { Layout } from '@/components/layout/Layout'
@@ -10,24 +10,34 @@ import { HomePage } from '@/pages/Home'
 import { NotFoundPage } from '@/pages/NotFound'
 import { PrivacyPage } from '@/pages/Privacy'
 import { METRIC_CATALOG } from '@/features/face-analysis/metric-catalog'
-import { I18nProvider, translate } from '@/i18n'
+import { RoutedI18nProvider, stripLang, translate } from '@/i18n'
 
-function renderApp(path: string, lang?: 'en' | 'vi') {
-  const app = (
-    <MemoryRouter initialEntries={[path]}>
-      <Suspense fallback={null}>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route index element={<HomePage />} />
-            <Route path="about" element={<AboutPage />} />
-            <Route path="privacy" element={<PrivacyPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-        </Routes>
-      </Suspense>
-    </MemoryRouter>
+/** Mirrors AppRoutes (src/App.tsx) with the pages imported directly, so the tests can stay synchronous. */
+function Pages() {
+  const { pathname, search, hash } = useLocation()
+  return (
+    <Routes location={{ pathname: stripLang(pathname), search, hash }}>
+      <Route element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="about" element={<AboutPage />} />
+        <Route path="privacy" element={<PrivacyPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
   )
-  return render(lang ? <I18nProvider initialLang={lang}>{app}</I18nProvider> : app)
+}
+
+/** Renders the app at `path`; a `/vi` prefix means Vietnamese, as in the real site. */
+function renderApp(path: string) {
+  return render(
+    <MemoryRouter initialEntries={[path]}>
+      <RoutedI18nProvider>
+        <Suspense fallback={null}>
+          <Pages />
+        </Suspense>
+      </RoutedI18nProvider>
+    </MemoryRouter>,
+  )
 }
 
 describe('home page', () => {
@@ -186,12 +196,12 @@ describe('privacy page', () => {
 
 describe('Vietnamese pages', () => {
   it('translates the home page, its call-to-action links and the illustration text', () => {
-    renderApp('/', 'vi')
+    renderApp('/vi')
     expect(screen.getByRole('heading', { level: 1, name: 'Khám phá hình học trên khuôn mặt bạn' })).toBeInTheDocument()
     const upload = screen.getAllByRole('link', { name: 'Tải ảnh lên' })[0]!
     const camera = screen.getAllByRole('link', { name: 'Chụp ảnh' })[0]!
-    expect(upload).toHaveAttribute('href', '/analysis?source=upload')
-    expect(camera).toHaveAttribute('href', '/analysis?source=camera')
+    expect(upload).toHaveAttribute('href', '/vi/analysis?source=upload')
+    expect(camera).toHaveAttribute('href', '/vi/analysis?source=camera')
     expect(screen.getByRole('heading', { name: /ba bước/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Công cụ này không thể cho bạn biết điều gì' })).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /Hình minh họa đường viền khuôn mặt/ })).toBeInTheDocument()
@@ -202,7 +212,7 @@ describe('Vietnamese pages', () => {
   })
 
   it('translates the about page, including the formulas and the measurements table', () => {
-    renderApp('/about', 'vi')
+    renderApp('/vi/about')
     expect(screen.getByRole('heading', { level: 1, name: /Một con số nổi tiếng/ })).toBeInTheDocument()
     expect(screen.getByText(/r = max\(A, B\) ÷ min\(A, B\), nên r không bao giờ nhỏ hơn 1/)).toBeInTheDocument()
     expect(screen.getByText(/A = 1.45, B = 1 cho r = 1.45/)).toBeInTheDocument()
@@ -214,7 +224,7 @@ describe('Vietnamese pages', () => {
   })
 
   it('translates the privacy policy and terms while keeping the section anchor', () => {
-    renderApp('/privacy', 'vi')
+    renderApp('/vi/privacy')
     expect(screen.getByRole('heading', { level: 1, name: /ở lại trên thiết bị/ })).toBeInTheDocument()
     expect(screen.getByText(/Cập nhật lần cuối ngày 20 tháng 10 năm 2026/)).toBeInTheDocument()
     const terms = document.getElementById('terms')!
@@ -228,9 +238,9 @@ describe('Vietnamese pages', () => {
   })
 
   it('translates the 404 page', () => {
-    renderApp('/nope', 'vi')
+    renderApp('/vi/nope')
     expect(screen.getByRole('heading', { level: 1, name: 'Trang này không tồn tại' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Về trang chủ' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: 'Về trang chủ' })).toHaveAttribute('href', '/vi')
     expect(document.title).toBe('Không tìm thấy trang — GoldenFace')
   })
 })

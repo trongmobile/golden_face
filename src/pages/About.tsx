@@ -1,10 +1,9 @@
-import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/Card'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { buttonStyles } from '@/components/ui/button-styles'
 import { DEFAULT_SIMILARITY_K, PHI, compareToGolden } from '@/features/face-analysis/golden-ratio'
 import { METRIC_CATALOG } from '@/features/face-analysis/metric-catalog'
-import { useI18n } from '@/i18n'
+import { Link, useI18n } from '@/i18n'
 import { formatRatio } from '@/utils/format'
 import { usePageMeta } from '@/utils/usePageMeta'
 

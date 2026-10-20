@@ -55,7 +55,8 @@ test.describe('SEO and static hosting', () => {
     })
     await page.goto('/')
     await page.waitForLoadState('networkidle')
-    expect(scripts.length).toBeLessThanOrEqual(2)
+    // The app entry plus the shared chunks it needs (translations, preload helper) — never a route or the model.
+    expect(scripts.length).toBeLessThanOrEqual(4)
     expect(scripts.some((s) => /Analysis|vision_bundle/.test(s))).toBe(false)
   })
 })

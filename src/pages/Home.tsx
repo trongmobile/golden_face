@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import {
   ArrowRight,
   Camera,
@@ -15,7 +14,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { buttonStyles } from '@/components/ui/button-styles'
-import { useI18n } from '@/i18n'
+import { Link, useI18n } from '@/i18n'
 import { usePageMeta } from '@/utils/usePageMeta'
 
 const STEPS = [

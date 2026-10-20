@@ -9,6 +9,11 @@ export const layout: typeof en = {
   closeMenu: 'Đóng menu',
   language: 'Ngôn ngữ',
   loadingPage: 'Đang tải trang',
+  suggestVi: {
+    text: 'Trang này có bản tiếng Việt.',
+    cta: 'Xem bằng tiếng Việt',
+    dismiss: 'Đóng',
+  },
   analyzeCta: 'Phân tích ảnh',
   nav: {
     home: 'Trang chủ',

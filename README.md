@@ -24,6 +24,7 @@ golden ratio (φ ≈ 1.618) — as a piece of geometry, not as a judgement of pe
 - [Architecture](#architecture)
 - [Privacy](#privacy)
 - [Languages](#languages)
+- [SEO](#seo)
 - [Deploying](#deploying)
 - [Testing](#testing)
 - [Limitations](#limitations)
@@ -40,8 +41,8 @@ golden ratio (φ ≈ 1.618) — as a piece of geometry, not as a judgement of pe
 | Golden ratio | Documented formula, configurable `k`, only for 3 ratios with a recognised φ claim (see below).                                                                                                                                                            |
 | Results      | Overlay on the photo with toggleable layers, face-focused view, zoom, hover/pin highlighting, bar chart, quality report, formula + limitation notes.                                                                                                      |
 | Actions      | Analyze another photo, **PNG report**, print / save as PDF, clear photo & results.                                                                                                                                                                        |
-| Languages    | English and Tiếng Việt: detected from `?lang=` or the browser, switched with the EN / VI buttons, never stored (see [Languages](#languages)).                                                                                                              |
-| Quality      | Responsive, keyboard accessible (WCAG 2.1 AA checked with axe), `prefers-reduced-motion` aware, SEO metadata, per-route static HTML for GitHub Pages.                                                                                                     |
+| Languages    | English and Tiếng Việt, each at its own address (`/about`, `/vi/about`) with `hreflang`; the language is never stored (see [Languages](#languages)).                                                                                                      |
+| Quality      | Responsive, keyboard accessible (WCAG 2.1 AA checked with axe), `prefers-reduced-motion` aware, SEO metadata, every page pre-rendered per language for GitHub Pages (see [SEO](#seo)).                                                                    |
 
 ## Tech stack
 
@@ -80,16 +81,16 @@ The model is only downloaded when a user starts an analysis, so the home page st
 
 ## Scripts
 
-| Command             | Purpose                                                 |
-| ------------------- | ------------------------------------------------------- |
-| `npm run dev`       | Dev server.                                             |
-| `npm run build`     | Typecheck (`tsc -b`) and production build to `dist/`.   |
-| `npm run preview`   | Serve `dist/` locally.                                  |
-| `npm run lint`      | ESLint (typescript-eslint, react-hooks, react-refresh). |
-| `npm run typecheck` | `tsc -b --noEmit` for app, tests and tooling.           |
-| `npm test`          | Vitest unit + component tests.                          |
-| `npm run test:e2e`  | Playwright end-to-end tests (desktop + mobile Chrome).  |
-| `npm run check`     | lint → typecheck → test → build.                        |
+| Command             | Purpose                                                             |
+| ------------------- | ------------------------------------------------------------------- |
+| `npm run dev`       | Dev server.                                                         |
+| `npm run build`     | Typecheck, production build, then pre-render every page to `dist/`. |
+| `npm run preview`   | Serve `dist/` locally.                                              |
+| `npm run lint`      | ESLint (typescript-eslint, react-hooks, react-refresh).             |
+| `npm run typecheck` | `tsc -b --noEmit` for app, tests and tooling.                       |
+| `npm test`          | Vitest unit + component tests.                                      |
+| `npm run test:e2e`  | Playwright end-to-end tests (desktop + mobile Chrome).              |
+| `npm run check`     | lint → typecheck → test → build.                                    |
 
 ## How the analysis works
 
@@ -166,7 +167,9 @@ rejected.
 ```
 src/
   components/            shared UI (layout, ui primitives, brand, illustration)
-  i18n/                  translations (locales/en, locales/vi), useI18n(), language detection
+  i18n/                  translations (locales/en, locales/vi), useI18n(), language-aware links and URLs
+  seo/                   titles, canonical/hreflang, JSON-LD, sitemap (pure functions used by the build)
+  entry-server.tsx       renders a page to HTML at build time (see SEO)
   pages/                 Home, Analysis, About, Privacy, NotFound
   features/
     camera/              useCamera hook, camera errors, CameraModal
@@ -185,7 +188,7 @@ src/
   utils/                 small helpers
   tests/                 Vitest tests
 e2e/                     Playwright tests
-scripts/                 asset preparation
+scripts/                 asset preparation, prerender.mjs (writes the finished pages)
 ```
 
 UI, image handling, measurement maths and scoring are separate: `measurements.ts`, `golden-ratio.ts`, `geometry.ts`,
@@ -209,14 +212,24 @@ UI, image handling, measurement maths and scoring are separate: `measurements.ts
 
 ## Languages
 
-The interface is available in **English** (the default) and **Tiếng Việt**.
+The interface is available in **English** (the default) and **Tiếng Việt**. Each language has its own address, so
+search engines can index both and visitors can share a link in the right language:
 
-- The language is taken from, in order: a `?lang=vi` link, the browser's language preferences, then English. The
-  EN / VI buttons in the header change it for the visit. Share `…/?lang=vi` to link straight to a language.
-- **The choice is not saved** — GoldenFace promises to store nothing, so the language is detected again on every
-  visit and kept in memory while the tab is open.
-- The static HTML shells (title, description and Open Graph tags that crawlers and link previews read) are English
-  only; the page title and description are translated as soon as the app loads.
+| English     | Vietnamese     |
+| ----------- | -------------- |
+| `/`         | `/vi`          |
+| `/analysis` | `/vi/analysis` |
+| `/about`    | `/vi/about`    |
+| `/privacy`  | `/vi/privacy`  |
+
+- The language is whatever the address says. The EN / VI buttons in the header move to the same page in the other
+  language (keeping the scroll position, the query string and any photo being analysed) and replace the history entry,
+  so Back still leaves the page.
+- **Nothing is saved.** GoldenFace promises to store nothing, and because the language is part of the address no
+  preference needs to be.
+- A visitor whose browser prefers Vietnamese and who opens an English page sees a small offer to read it in Vietnamese
+  (`LanguageSuggestion`). It never redirects: search engines should see each language at its own address, and a forced
+  redirect would trap anyone who wants English.
 - Numbers keep a dot as the decimal separator in every language (`1.618`), matching the formulas shown on screen.
 
 ### How it is organised
@@ -225,8 +238,11 @@ The interface is available in **English** (the default) and **Tiếng Việt**.
 src/i18n/
   locales/en/*.ts   English, the source of truth — one file per area (home, about, results, quality, …)
   locales/vi/*.ts   Vietnamese, typed against the English files: a missing or extra key is a compile error
-  translate.ts      lookup, {placeholders}, language detection, msg()
+  translate.ts      lookup, {placeholders}, msg()
+  paths.ts          /vi prefix helpers: langFromPath, withLang, localizeTo
+  links.tsx         Link / NavLink that keep the visitor's language in every internal link
   context.ts        useI18n() → { t, list, rich, lang, setLang }
+  RoutedI18nProvider.tsx   takes the language from the URL; switching language navigates
 ```
 
 - Components call `const { t } = useI18n()` and `t('home.hero.title')`; keys are type-checked. Messages can contain
@@ -240,12 +256,43 @@ src/i18n/
 
 ### Adding a language
 
-1. Add its code to `Lang` (`src/i18n/types.ts`), to `LANGUAGES` and `DICTIONARIES` (`src/i18n/translate.ts`).
+1. Add its code to `Lang` (`src/i18n/types.ts`), to `LANGUAGES` (with its `og:locale`) and `DICTIONARIES`
+   (`src/i18n/translate.ts`). Its pages appear at `/<code>/…` automatically: the router, the links, the pre-render, the
+   `hreflang` links and the sitemap all follow `LANGUAGES`.
 2. Copy `src/i18n/locales/vi/` to `locales/<code>/` and translate each file. `npm run typecheck` lists anything missing.
 3. Run `npm test`: `i18n.test.tsx` checks that every key exists in every language and that the `{placeholders}` and
    `<tags>` match the English text.
 
 The header shows one button per language, which suits two or three; with more, replace `LanguageSwitcher` by a menu.
+
+## SEO
+
+What a search engine gets, and how:
+
+- **The content is in the HTML.** `npm run build` renders the app for every page in every language
+  (`scripts/prerender.mjs` + `src/entry-server.tsx`), writes the result to `dist/<lang>/<page>/index.html` and the
+  browser then _hydrates_ it. Crawlers, link previews and visitors with JavaScript off read real text, not an empty
+  `<div id="root">`. Unknown addresses fall back to `404.html`, which has an empty root and renders client-side.
+- **One address per language and page**, each with its own `<title>`, description, `<html lang>`, Open Graph tags
+  (`og:locale` plus the alternates) and a canonical link to itself.
+- **`hreflang` links** (`en`, `vi`, and `x-default` = English) on every page and in `sitemap.xml`, so Google can show
+  the Vietnamese page to Vietnamese searchers and the English one to everyone else.
+- **Structured data**: the home pages carry `WebApplication` JSON-LD (free, in-browser, entertainment).
+- `robots.txt` allows everything and points at the sitemap.
+
+Canonical, `hreflang`, `og:url`, JSON-LD and the sitemap need absolute URLs, so they are written only when
+`VITE_SITE_URL` is set (the GitHub Actions workflow sets it). Titles and descriptions come from the same dictionaries as
+the interface (`home.metaTitle`, `about.metaDescription`, …), so each page and language needs its own.
+
+After deploying:
+
+1. Add the site to [Google Search Console](https://search.google.com/search-console), verify it (the
+   `google-site-verification` tag in `index.html` is already on every page — keep it) and submit
+   `…/sitemap.xml`; use _URL inspection_ to request indexing of the home pages.
+2. Check _Pages → Why pages aren't indexed_ and _International targeting_ after a few days.
+3. A custom domain (`VITE_BASE_PATH=/`) is better for search than `<owner>.github.io/<repo>`.
+4. Ranking also depends on what the pages say and who links to them — write for the questions people actually search
+   for ("what is the golden ratio of the face"), in both languages.
 
 ## Deploying
 
@@ -268,17 +315,17 @@ VITE_BASE_PATH=/golden_face/ VITE_SITE_URL=https://<owner>.github.io/golden_face
 # upload dist/ to any static host
 ```
 
-| Variable         | Meaning                                                                                                                   | Default |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `VITE_BASE_PATH` | Path the site is served from (`/` for a custom domain, `/repo/` for a project page).                                      | `/`     |
-| `VITE_SITE_URL`  | Public URL without trailing slash; enables canonical/Open Graph URLs, `sitemap.xml` and the sitemap line in `robots.txt`. | empty   |
+| Variable         | Meaning                                                                                                                               | Default |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `VITE_BASE_PATH` | Path the site is served from (`/` for a custom domain, `/repo/` for a project page).                                                  | `/`     |
+| `VITE_SITE_URL`  | Public URL without trailing slash; enables canonical/`hreflang`/Open Graph URLs, JSON-LD, `sitemap.xml` and its line in `robots.txt`. | empty   |
 
 The build also emits, for static hosts:
 
-- a pre-rendered HTML shell for every route (`analysis/index.html`, `about/index.html`, `privacy/index.html`) with its
-  own `<title>` and description, served with HTTP 200;
+- every page in every language, fully rendered (`index.html`, `about/`, `analysis/`, `privacy/` and the same under
+  `vi/`), each with its own `<title>`, description and language, served with HTTP 200;
 - `404.html` as the single-page-app fallback for unknown URLs;
-- `robots.txt` and, with `VITE_SITE_URL`, `sitemap.xml`.
+- `robots.txt` and, with `VITE_SITE_URL`, `sitemap.xml`, canonical/`hreflang` links and JSON-LD.
 
 HTTPS is required for camera access; GitHub Pages provides it. Any other static host works the same way (Netlify,
 Cloudflare Pages, S3…) — set `VITE_BASE_PATH` to match.
@@ -305,7 +352,8 @@ photos of people are stored in the repository); without it, the tests that need 
 verify, among other things: the real analysis end to end, that **no external or non-GET request is ever made**, that no
 storage is used, camera release in real Chrome, axe WCAG 2.1 A/AA checks across pages and states, keyboard
 behaviour, no horizontal scrolling from 320 px to 1440 px, PNG download, print styling and per-route static HTML, plus
-language detection, switching and a Vietnamese analysis run (with nothing stored).
+the language addresses, switching, pre-rendered content with JavaScript off, hydration without console errors and a
+Vietnamese analysis run (with nothing stored).
 
 ## Limitations
 
@@ -322,7 +370,7 @@ language detection, switching and a Vietnamese analysis run (with nothing stored
 - The first analysis downloads ~4 MB (model) plus ~13 MB (WASM engine) and needs an internet connection; afterwards
   the browser cache serves them.
 - The interface is English and Vietnamese only; the translations were written for this project and have not been
-  reviewed by a second native speaker. The static HTML shells stay English.
+  reviewed by a second native speaker.
 
 ## Credits
 

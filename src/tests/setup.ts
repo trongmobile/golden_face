@@ -34,17 +34,20 @@ function createFakeContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D 
   }) as unknown as CanvasRenderingContext2D
 }
 
-HTMLCanvasElement.prototype.getContext = function getContext(this: HTMLCanvasElement) {
-  return createFakeContext(this)
-} as unknown as HTMLCanvasElement['getContext']
+// Test files that run in Node (// @vitest-environment node) have no DOM to patch.
+if (typeof window !== 'undefined') {
+  HTMLCanvasElement.prototype.getContext = function getContext(this: HTMLCanvasElement) {
+    return createFakeContext(this)
+  } as unknown as HTMLCanvasElement['getContext']
 
-HTMLCanvasElement.prototype.toBlob = function toBlob(callback: BlobCallback, type?: string) {
-  callback(new Blob(['fake'], { type: type ?? 'image/png' }))
+  HTMLCanvasElement.prototype.toBlob = function toBlob(callback: BlobCallback, type?: string) {
+    callback(new Blob(['fake'], { type: type ?? 'image/png' }))
+  }
+
+  // Not implemented by jsdom.
+  window.scrollTo = (() => undefined) as typeof window.scrollTo
+  Element.prototype.scrollIntoView = (() => undefined) as typeof Element.prototype.scrollIntoView
 }
-
-// Not implemented by jsdom.
-window.scrollTo = (() => undefined) as typeof window.scrollTo
-Element.prototype.scrollIntoView = (() => undefined) as typeof Element.prototype.scrollIntoView
 
 // Recharts' ResponsiveContainer needs ResizeObserver.
 class ResizeObserverStub {

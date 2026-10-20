@@ -1,9 +1,8 @@
 import { useEffect, useId, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
 import { Menu, ScanFace, X } from 'lucide-react'
 import { Logo } from '@/components/brand/Logo'
 import { buttonStyles } from '@/components/ui/button-styles'
-import { useI18n, type MsgKey } from '@/i18n'
+import { Link, NavLink, useI18n, type MsgKey } from '@/i18n'
 import { cn } from '@/utils/cn'
 import { LanguageSwitcher } from './LanguageSwitcher'
 

@@ -7,6 +7,11 @@ export const layout = {
   closeMenu: 'Close menu',
   language: 'Language',
   loadingPage: 'Loading page',
+  suggestVi: {
+    text: 'This page is also available in Vietnamese.',
+    cta: 'Read in Vietnamese',
+    dismiss: 'Dismiss',
+  },
   analyzeCta: 'Analyze a photo',
   nav: {
     home: 'Home',

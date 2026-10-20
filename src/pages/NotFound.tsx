@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom'
 import { buttonStyles } from '@/components/ui/button-styles'
-import { useI18n } from '@/i18n'
+import { Link, useI18n } from '@/i18n'
 import { usePageMeta } from '@/utils/usePageMeta'
 
 export function NotFoundPage() {

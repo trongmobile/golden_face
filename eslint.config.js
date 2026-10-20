@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'coverage', 'public', 'playwright-report', 'test-results', 'node_modules']),
+  globalIgnores(['dist', 'dist-ssr', 'coverage', 'public', 'playwright-report', 'test-results', 'node_modules']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -22,6 +22,11 @@ export default defineConfig([
     rules: {
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
+  },
+  {
+    // Build-time entry: it exports functions for scripts/prerender.mjs, not components.
+    files: ['src/entry-server.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
   },
   {
     files: ['scripts/**/*.mjs', 'vite.config.ts', 'vitest.config.ts', 'playwright.config.ts', 'e2e/**/*.ts'],

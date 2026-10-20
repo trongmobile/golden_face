@@ -9,7 +9,7 @@
     "prepare:assets": "node scripts/prepare-assets.mjs",
     "postinstall": "node scripts/prepare-assets.mjs",
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",

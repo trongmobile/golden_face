@@ -5,9 +5,9 @@ import type { Dict, Lang, ListKey, Msg, MsgKey, Params, Translate } from './type
 export const DEFAULT_LANG: Lang = 'en'
 
 /** `name` is shown in the language switcher in the language's own words. */
-export const LANGUAGES: readonly { code: Lang; name: string; htmlLang: string }[] = [
-  { code: 'en', name: 'English', htmlLang: 'en' },
-  { code: 'vi', name: 'Tiếng Việt', htmlLang: 'vi' },
+export const LANGUAGES: readonly { code: Lang; name: string; htmlLang: string; ogLocale: string }[] = [
+  { code: 'en', name: 'English', htmlLang: 'en', ogLocale: 'en_US' },
+  { code: 'vi', name: 'Tiếng Việt', htmlLang: 'vi', ogLocale: 'vi_VN' },
 ]
 
 export const DICTIONARIES: Record<Lang, Dict> = { en, vi }

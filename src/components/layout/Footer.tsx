@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom'
 import { Lock } from 'lucide-react'
 import { Logo } from '@/components/brand/Logo'
-import { useI18n } from '@/i18n'
+import { Link, useI18n } from '@/i18n'
 
 export function Footer() {
   const { t } = useI18n()
@@ -53,7 +52,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-line">
-        <p className="container-page py-5 text-xs text-muted">
+        <p className="container-page py-5 text-xs text-muted" suppressHydrationWarning>
           {t('layout.footer.copyright', { year: new Date().getFullYear() })}
         </p>
       </div>

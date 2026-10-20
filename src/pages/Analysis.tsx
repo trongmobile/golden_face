@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState, useSyncExternalStore } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Camera, CheckCircle2, Lock, ScanFace, Sun, UserRound } from 'lucide-react'
 import { Alert } from '@/components/ui/Alert'
@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { CameraModal } from '@/features/camera/CameraModal'
-import { checkCameraSupport } from '@/features/camera/camera-errors'
+import { cameraError, checkCameraSupport } from '@/features/camera/camera-errors'
 import { AnalysisError, analyzeFace, type AnalysisStage } from '@/features/face-analysis/analyze'
 import { AnalysisErrorPanel } from '@/features/face-analysis/components/AnalysisErrorPanel'
 import { AnalyzingPanel } from '@/features/face-analysis/components/AnalyzingPanel'
@@ -111,11 +111,21 @@ const TIPS: readonly { icon: typeof UserRound; text: MsgKey }[] = [
   { icon: CheckCircle2, text: 'analysisPage.tips.hair' },
 ]
 
+const subscribeToNothing = () => () => {}
+const noCameraProblemOnTheServer = () => null
+
 export function AnalysisPage() {
   const { t } = useI18n()
   usePageMeta(t('analysisPage.meta.title'), t('analysisPage.meta.description'))
 
   const [state, dispatch] = useReducer(reducer, initialState)
+  // Whether this browser can use a camera is only known in the browser. Reading it through a store
+  // keeps the pre-rendered page and the first browser render identical (no hydration mismatch).
+  const cameraProblemKind = useSyncExternalStore(
+    subscribeToNothing,
+    () => checkCameraSupport()?.kind ?? null,
+    noCameraProblemOnTheServer,
+  )
   const [searchParams] = useSearchParams()
   // "Take a Photo" from the home page opens the camera dialog right away, but waits for an
   // explicit click on "Start camera" before asking the browser for permission.
@@ -362,7 +372,7 @@ export function AnalysisPage() {
       </div>
     )
   } else {
-    const cameraProblem = checkCameraSupport()
+    const cameraProblem = cameraProblemKind ? cameraError(cameraProblemKind) : null
     content = (
       <div className="container-page py-10 sm:py-14">
         <p className="text-xs font-semibold tracking-[0.18em] text-accent-700 uppercase">{t('analysisPage.select.eyebrow')}</p>
