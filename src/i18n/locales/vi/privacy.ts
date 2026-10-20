@@ -14,7 +14,7 @@ export const privacy: typeof en = {
     title: 'Tóm tắt',
     items: [
       'Ảnh được phân tích ngay trong trình duyệt của bạn. GoldenFace không có máy chủ nào nhận ảnh, nên không có nơi nào để hình ảnh hay các điểm mốc khuôn mặt của nó được tải lên.',
-      'Không có gì được lưu lại: không tài khoản, không cookie, không localStorage hay IndexedDB, không phân tích hành vi và không quảng cáo.',
+      'Không có gì được lưu lại: không tài khoản, không cookie, không localStorage hay IndexedDB và không quảng cáo. Thống kê duy nhất là số lượt xem trang ẩn danh (xem mục “Những gì có kết nối mạng”).',
       'Ảnh của bạn không bao giờ được dùng để huấn luyện mô hình, và GoldenFace không bao giờ xác định bạn là ai.',
     ],
   },
@@ -38,6 +38,7 @@ export const privacy: typeof en = {
     items: [
       'Tải chính trang web (HTML, script, kiểu dáng, phông chữ) từ máy chủ đang phục vụ nó. Phông chữ được tự lưu trữ; không dùng Google Fonts hay dịch vụ phông chữ của bên thứ ba nào.',
       'Tải công cụ phân tích khuôn mặt và mô hình (khoảng 4 MB) vào lần đầu bạn bắt đầu phân tích, để trang chủ luôn nhanh. Chúng được phục vụ từ chính trang này, nghĩa là lần phân tích đầu tiên cần kết nối internet. Nếu bản sao đó không có sẵn, ứng dụng sẽ dùng Google Cloud Storage (mô hình) và jsDelivr (công cụ): các dịch vụ này có thể thấy địa chỉ IP và các tiêu đề yêu cầu thông thường của bạn, nhưng không bao giờ thấy ảnh của bạn.',
+      'Một bộ đếm lượt truy cập thân thiện với quyền riêng tư, GoatCounter, ghi lại rằng một trang đã được mở: địa chỉ trang cùng các thông tin kỹ thuật thông thường như trang giới thiệu, trình duyệt, kích thước màn hình và quốc gia (ước chừng). Nó không đặt cookie, không dùng bộ nhớ cục bộ và không bao giờ nhận ảnh, điểm mốc hay kết quả của bạn. Trình duyệt của bạn tải script của nó từ gc.zgo.at và báo về goldenface.goatcounter.com, nên dịch vụ đó có thể thấy địa chỉ IP và các tiêu đề yêu cầu thông thường của bạn. Bộ đếm không được tải khi trang chạy trên localhost hoặc địa chỉ mạng nội bộ.',
       'Như mọi trang web, nhà cung cấp dịch vụ lưu trữ có thể giữ nhật ký máy chủ thông thường (như địa chỉ IP và URL được yêu cầu) theo chính sách riêng của họ. GoldenFace không nhận hay xử lý các nhật ký này.',
     ],
   },

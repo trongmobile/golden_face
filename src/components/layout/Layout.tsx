@@ -2,6 +2,7 @@ import { Suspense, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { useI18n } from '@/i18n'
+import { trackPageview } from '@/utils/analytics'
 import { Footer } from './Footer'
 import { Header } from './Header'
 
@@ -29,6 +30,12 @@ function useRouteEffects(mainRef: React.RefObject<HTMLElement | null>) {
   }, [pathname, hash, mainRef])
 }
 
+/** Counts every page the visitor opens (the app never reloads, so the script cannot see them itself). */
+function usePageviews() {
+  const { pathname } = useLocation()
+  useEffect(() => trackPageview(pathname), [pathname])
+}
+
 function PageFallback() {
   const { t } = useI18n()
   return (
@@ -43,6 +50,7 @@ export function Layout() {
   const { t } = useI18n()
   const mainRef = useRef<HTMLElement>(null)
   useRouteEffects(mainRef)
+  usePageviews()
 
   return (
     <div className="flex min-h-dvh flex-col">

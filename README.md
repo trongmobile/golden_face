@@ -195,8 +195,12 @@ UI, image handling, measurement maths and scoring are separate: `measurements.ts
 ## Privacy
 
 - Photos, camera frames and landmarks are processed in memory in the browser and never sent anywhere.
-- Nothing is written to `localStorage`, `sessionStorage`, IndexedDB or cookies. There are no analytics or trackers.
+- Nothing is written to `localStorage`, `sessionStorage`, IndexedDB or cookies. There are no advertising trackers.
   That includes the language choice: it is detected on every visit and kept in memory only.
+- The only statistics are anonymous page-view counts from [GoatCounter](https://www.goatcounter.com) (no cookies, no
+  storage; it is never sent photos, landmarks or results). It is loaded by `src/utils/analytics.ts`, only on public
+  domains — never on localhost or private-network addresses — and counts each route change itself, because the app is
+  a single-page app.
 - Temporary object URLs are revoked immediately; canvases are released; the camera stream is stopped; the model is
   freed when leaving the Analysis page.
 - No face recognition, no identity or sensitive-attribute inference. Expression scores are used locally only to warn

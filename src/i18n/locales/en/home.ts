@@ -68,7 +68,7 @@ export const home = {
     },
     nothingStored: {
       title: 'Nothing is stored',
-      text: 'No accounts, cookies, local storage or analytics.',
+      text: 'No accounts, cookies or local storage. Only an anonymous visit counter.',
     },
     cameraOnRequest: {
       title: 'Camera on request',

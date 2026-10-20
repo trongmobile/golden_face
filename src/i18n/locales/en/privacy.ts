@@ -11,7 +11,7 @@ export const privacy = {
     title: 'The short version',
     items: [
       'Photos are analyzed inside your browser. GoldenFace has no server that receives photos, so there is nowhere for an image or its facial landmarks to be uploaded.',
-      'Nothing is saved: no accounts, no cookies, no localStorage or IndexedDB, no analytics and no advertising.',
+      'Nothing is saved: no accounts, no cookies, no localStorage or IndexedDB and no advertising. The only statistics are anonymous page-view counts (see “What does touch the network”).',
       'Your photo is never used to train models, and GoldenFace never identifies who you are.',
     ],
   },
@@ -35,6 +35,7 @@ export const privacy = {
     items: [
       'Loading the website itself (HTML, scripts, styles, fonts) from the host it is served from. Fonts are self-hosted; no Google Fonts or other third-party font services are used.',
       'Loading the face-analysis engine and model (about 4 MB) the first time you start an analysis, so the home page stays fast. They are served from the same site, which means the first analysis needs an internet connection. If that copy is unavailable, the app falls back to Google Cloud Storage (model) and jsDelivr (engine): those services can see your IP address and standard request headers, but never your photo.',
+      'A privacy-friendly visit counter, GoatCounter, records that a page was opened: the page address plus ordinary technical details such as the referring site, browser, screen size and approximate country. It sets no cookies and uses no local storage, and it is never sent your photo, landmarks or results. Your browser loads its script from gc.zgo.at and reports to goldenface.goatcounter.com, so that service can see your IP address and standard request headers. The counter is not loaded when the site runs on localhost or a private network address.',
       'Like any website, the hosting provider may keep standard server logs (such as IP address and requested URL) under its own policy. GoldenFace does not receive or process these logs.',
     ],
   },

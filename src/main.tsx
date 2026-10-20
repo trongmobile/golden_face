@@ -5,6 +5,9 @@ import '@fontsource-variable/fraunces/wght.css'
 import './index.css'
 import { App } from './App'
 import { I18nProvider } from './i18n'
+import { startAnalytics } from './utils/analytics'
+
+startAnalytics()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

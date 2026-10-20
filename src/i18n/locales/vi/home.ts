@@ -70,7 +70,7 @@ export const home: typeof en = {
     },
     nothingStored: {
       title: 'Không lưu trữ gì cả',
-      text: 'Không tài khoản, không cookie, không bộ nhớ cục bộ, không phân tích hành vi.',
+      text: 'Không tài khoản, không cookie, không bộ nhớ cục bộ. Chỉ có bộ đếm lượt truy cập ẩn danh.',
     },
     cameraOnRequest: {
       title: 'Camera chỉ khi bạn yêu cầu',
