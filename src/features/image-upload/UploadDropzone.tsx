@@ -2,28 +2,31 @@ import { useRef, useState } from 'react'
 import { ImagePlus, Loader2, UploadCloud } from 'lucide-react'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import { msg, useI18n, type Msg } from '@/i18n'
 import { cn } from '@/utils/cn'
 import { ACCEPT_ATTRIBUTE, MAX_FILE_MB } from './file-validation'
 
 interface UploadDropzoneProps {
   onFile: (file: File) => void
   busy?: boolean
-  error?: string | null
+  /** An error from validating or opening the photo, as a translatable message. */
+  error?: Msg | null
   /** Ref callback so the page can focus the button (e.g. after "Upload Photo" on the home page). */
   buttonRef?: React.Ref<HTMLButtonElement>
 }
 
 export function UploadDropzone({ onFile, busy = false, error, buttonRef }: UploadDropzoneProps) {
+  const { t } = useI18n()
   const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
-  const [dropError, setDropError] = useState<string | null>(null)
+  const [dropError, setDropError] = useState<Msg | null>(null)
   const depth = useRef(0)
 
   const handleFiles = (files: FileList | null | undefined) => {
     setDropError(null)
     if (!files || files.length === 0) return
     if (files.length > 1) {
-      setDropError('Please add one photo at a time.')
+      setDropError(msg('upload.errors.tooManyFiles'))
       return
     }
     onFile(files[0]!)
@@ -66,9 +69,9 @@ export function UploadDropzone({ onFile, busy = false, error, buttonRef }: Uploa
           )}
         </span>
         <p className="mt-5 font-display text-2xl font-medium text-ink">
-          {dragging ? 'Drop your photo here' : 'Drag & drop a photo here'}
+          {dragging ? t('upload.dropzone.dropHere') : t('upload.dropzone.dragHere')}
         </p>
-        <p className="mt-1 text-sm text-muted">or choose one from your device</p>
+        <p className="mt-1 text-sm text-muted">{t('upload.dropzone.orChoose')}</p>
 
         <input
           ref={inputRef}
@@ -92,16 +95,16 @@ export function UploadDropzone({ onFile, busy = false, error, buttonRef }: Uploa
           onClick={() => inputRef.current?.click()}
           icon={<ImagePlus className="size-4" aria-hidden="true" />}
         >
-          {busy ? 'Opening photo…' : 'Choose a photo'}
+          {busy ? t('upload.dropzone.opening') : t('upload.dropzone.choose')}
         </Button>
         <p className="mt-4 text-xs text-muted">
-          JPG, PNG or WebP · up to {MAX_FILE_MB} MB · stays on your device
+          {t('upload.dropzone.hint', { limit: MAX_FILE_MB })}
         </p>
       </div>
 
       {(error || dropError) && (
-        <Alert tone="error" className="mt-4" title="This photo can’t be used">
-          {error ?? dropError}
+        <Alert tone="error" className="mt-4" title={t('upload.dropzone.errorTitle')}>
+          {t((error ?? dropError)!)}
         </Alert>
       )}
     </div>

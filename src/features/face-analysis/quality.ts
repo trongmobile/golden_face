@@ -1,3 +1,4 @@
+import { msg, type Msg } from '@/i18n'
 import type { ImageSize, Landmark, QualityCheck, QualityReport, Reliability } from '@/types'
 import { FACE_OVAL_INDICES } from './landmarks'
 import type { HeadPose } from './pose'
@@ -169,14 +170,14 @@ export function evaluateQuality(input: QualityInput): QualityReport {
 
   // ── Resolution / face size ──
   const smallSide = Math.min(size.width, size.height)
+  const smallPhoto = smallSide < T.imageMinSidePx.warn
   checks.push({
     id: 'resolution',
-    label: 'Photo resolution',
-    status: smallSide < T.imageMinSidePx.warn ? 'warn' : 'pass',
-    detail:
-      smallSide < T.imageMinSidePx.warn
-        ? `The photo is small (${fmt(smallSide)} px on its short side). Fine details may be imprecise.`
-        : 'The photo has enough pixels for landmark detection.',
+    label: msg('quality.checks.resolution.label'),
+    status: smallPhoto ? 'warn' : 'pass',
+    detail: smallPhoto
+      ? msg('quality.checks.resolution.warn', { px: fmt(smallSide) })
+      : msg('quality.checks.resolution.pass'),
   })
 
   if (box) {
@@ -184,14 +185,9 @@ export function evaluateQuality(input: QualityInput): QualityReport {
     const status = faceWidth < T.faceWidthPx.fail ? 'fail' : faceWidth < T.faceWidthPx.warn ? 'warn' : 'pass'
     checks.push({
       id: 'face-size',
-      label: 'Face size',
+      label: msg('quality.checks.faceSize.label'),
       status,
-      detail:
-        status === 'fail'
-          ? `The face is only about ${fmt(faceWidth)} px wide — too small to measure reliably. Move closer or crop the photo around the face.`
-          : status === 'warn'
-            ? `The face is about ${fmt(faceWidth)} px wide. A larger face (200 px or more) gives steadier measurements.`
-            : `The face is about ${fmt(faceWidth)} px wide.`,
+      detail: msg(`quality.checks.faceSize.${status}`, { px: fmt(faceWidth) }),
     })
 
     // ── Face fully inside the frame ──
@@ -200,11 +196,9 @@ export function evaluateQuality(input: QualityInput): QualityReport {
       Math.max(0, -box.x0, -box.y0, box.x1 - size.width, box.y1 - size.height) > tolerance
     checks.push({
       id: 'frame',
-      label: 'Face fully in frame',
+      label: msg('quality.checks.frame.label'),
       status: outside ? 'fail' : 'pass',
-      detail: outside
-        ? 'Part of the face is cut off by the edge of the photo, so some landmarks would be guesses. Leave space around the head.'
-        : 'The whole face outline is inside the photo.',
+      detail: msg(outside ? 'quality.checks.frame.fail' : 'quality.checks.frame.pass'),
     })
   }
 
@@ -213,38 +207,32 @@ export function evaluateQuality(input: QualityInput): QualityReport {
     const yawStatus = pose.yaw > T.yaw.fail ? 'fail' : pose.yaw > T.yaw.warn ? 'warn' : 'pass'
     checks.push({
       id: 'yaw',
-      label: 'Facing the camera (left / right)',
+      label: msg('quality.checks.yaw.label'),
       status: yawStatus,
-      detail:
-        yawStatus === 'pass'
-          ? `Head turn is about ${fmt(pose.yaw)}° — close to frontal.`
-          : `The head is turned about ${fmt(pose.yaw)}° sideways. Turning distorts widths and makes the face look asymmetric. Look straight into the lens.`,
+      detail: msg(yawStatus === 'pass' ? 'quality.checks.yaw.pass' : 'quality.checks.yaw.turned', { deg: fmt(pose.yaw) }),
     })
     const pitchStatus = pose.pitch > T.pitch.fail ? 'fail' : pose.pitch > T.pitch.warn ? 'warn' : 'pass'
     checks.push({
       id: 'pitch',
-      label: 'Head level (up / down)',
+      label: msg('quality.checks.pitch.label'),
       status: pitchStatus,
-      detail:
-        pitchStatus === 'pass'
-          ? `Head tilt up/down is about ${fmt(pose.pitch)}°.`
-          : `The head is tipped about ${fmt(pose.pitch)}° up or down, which changes the vertical proportions. Keep the chin level.`,
+      detail: msg(pitchStatus === 'pass' ? 'quality.checks.pitch.pass' : 'quality.checks.pitch.tipped', {
+        deg: fmt(pose.pitch),
+      }),
     })
+    const tilted = pose.roll > T.roll.warn
     checks.push({
       id: 'roll',
-      label: 'Head tilt (sideways)',
-      status: pose.roll > T.roll.warn ? 'warn' : 'pass',
-      detail:
-        pose.roll > T.roll.warn
-          ? `The head is tilted about ${fmt(pose.roll)}° sideways. Measurements are corrected for this, but a level head is more accurate.`
-          : `Sideways tilt is about ${fmt(pose.roll)}° (automatically corrected).`,
+      label: msg('quality.checks.roll.label'),
+      status: tilted ? 'warn' : 'pass',
+      detail: msg(tilted ? 'quality.checks.roll.warn' : 'quality.checks.roll.pass', { deg: fmt(pose.roll) }),
     })
   } else {
     checks.push({
       id: 'yaw',
-      label: 'Facing the camera',
+      label: msg('quality.checks.yaw.labelNoPose'),
       status: 'warn',
-      detail: 'The head pose could not be estimated, so a turned head cannot be ruled out.',
+      detail: msg('quality.checks.yaw.unknown'),
     })
   }
 
@@ -259,62 +247,54 @@ export function evaluateQuality(input: QualityInput): QualityReport {
           : 'pass'
     checks.push({
       id: 'brightness',
-      label: 'Lighting level',
+      label: msg('quality.checks.brightness.label'),
       status: brightnessStatus,
-      detail:
+      detail: msg(
         brightnessStatus === 'pass'
-          ? 'The face is evenly exposed — neither too dark nor too bright.'
+          ? 'quality.checks.brightness.pass'
           : pixels.meanLuma < b.warnLow
-            ? 'The face is dark. Landmarks are less precise in low light; face a window or lamp.'
-            : 'The face is overexposed. Bright glare hides edges; avoid direct flash or strong backlight.',
+            ? 'quality.checks.brightness.dark'
+            : 'quality.checks.brightness.bright',
+      ),
     })
 
     const imbalance = Math.abs(pixels.leftMean - pixels.rightMean) / Math.max(1, (pixels.leftMean + pixels.rightMean) / 2)
+    const unevenLight = imbalance > T.lightingImbalance.warn
     checks.push({
       id: 'lighting-balance',
-      label: 'Even lighting',
-      status: imbalance > T.lightingImbalance.warn ? 'warn' : 'pass',
-      detail:
-        imbalance > T.lightingImbalance.warn
-          ? 'One side of the face is much brighter than the other. Strong side light creates shadows that blur the outline.'
-          : 'Both sides of the face are lit similarly.',
+      label: msg('quality.checks.lightingBalance.label'),
+      status: unevenLight ? 'warn' : 'pass',
+      detail: msg(unevenLight ? 'quality.checks.lightingBalance.warn' : 'quality.checks.lightingBalance.pass'),
     })
 
+    const flat = pixels.stdLuma < T.contrast.warn
     checks.push({
       id: 'contrast',
-      label: 'Contrast',
-      status: pixels.stdLuma < T.contrast.warn ? 'warn' : 'pass',
-      detail:
-        pixels.stdLuma < T.contrast.warn
-          ? 'The face looks flat or washed out, which makes feature edges harder to locate.'
-          : 'There is enough contrast to see facial features.',
+      label: msg('quality.checks.contrast.label'),
+      status: flat ? 'warn' : 'pass',
+      detail: msg(flat ? 'quality.checks.contrast.warn' : 'quality.checks.contrast.pass'),
     })
 
+    const blurry = pixels.sharpness < T.sharpness.warn
     checks.push({
       id: 'sharpness',
-      label: 'Sharpness',
-      status: pixels.sharpness < T.sharpness.warn ? 'warn' : 'pass',
-      detail:
-        pixels.sharpness < T.sharpness.warn
-          ? 'The photo looks blurry or heavily smoothed. Hold the camera steady and focus on the face.'
-          : 'The face is in focus.',
+      label: msg('quality.checks.sharpness.label'),
+      status: blurry ? 'warn' : 'pass',
+      detail: msg(blurry ? 'quality.checks.sharpness.warn' : 'quality.checks.sharpness.pass'),
     })
   }
 
   // ── Expression ──
   if (expression) {
-    const issues: string[] = []
-    if (expression.smile > T.expression.smile) issues.push('smiling')
-    if (expression.jawOpen > T.expression.jawOpen) issues.push('mouth open')
-    if (expression.blink > T.expression.blink) issues.push('eyes closing')
+    const issues: Msg[] = []
+    if (expression.smile > T.expression.smile) issues.push(msg('quality.expressionIssues.smiling'))
+    if (expression.jawOpen > T.expression.jawOpen) issues.push(msg('quality.expressionIssues.mouthOpen'))
+    if (expression.blink > T.expression.blink) issues.push(msg('quality.expressionIssues.eyesClosing'))
     checks.push({
       id: 'expression',
-      label: 'Neutral expression',
+      label: msg('quality.checks.expression.label'),
       status: issues.length > 0 ? 'warn' : 'pass',
-      detail:
-        issues.length > 0
-          ? `The expression looks like: ${issues.join(', ')}. Expressions move the mouth, cheeks and jaw, so mouth-related ratios in particular will differ from a relaxed face.`
-          : 'The expression looks relaxed.',
+      detail: issues.length > 0 ? msg('quality.checks.expression.warn', { issues }) : msg('quality.checks.expression.pass'),
     })
   }
 

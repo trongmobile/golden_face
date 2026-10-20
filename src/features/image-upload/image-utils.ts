@@ -1,3 +1,4 @@
+import { msg } from '@/i18n'
 import { ImageFileError } from './file-validation'
 
 /** Longest side of the working copy. Bigger photos are scaled down to keep memory use predictable. */
@@ -91,11 +92,7 @@ export async function decodeImageFile(file: File): Promise<HTMLCanvasElement> {
     try {
       return await decodeWithImageElement(file)
     } catch {
-      throw new ImageFileError(
-        'unreadable',
-        'This image could not be opened. It may be corrupted or too large for this device.',
-        { cause: primaryError },
-      )
+      throw new ImageFileError('unreadable', msg('upload.errors.cannotOpen'), { cause: primaryError })
     }
   }
 }

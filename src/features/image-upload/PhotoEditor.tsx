@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { Crop, RotateCcw, RotateCw, Undo2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { CanvasPreview } from '@/components/ui/CanvasPreview'
+import { useI18n } from '@/i18n'
 import { FULL_RECT, isFullRect, type Photo, type QuarterTurns } from './image-utils'
 import { resizeRect, type DragMode, type PhotoEdits } from './crop-utils'
 
@@ -11,18 +12,20 @@ interface PhotoEditorProps {
   onChange: (edits: PhotoEdits) => void
 }
 
-const HANDLES: { mode: DragMode; className: string; cursor: string; label: string }[] = [
-  { mode: 'nw', className: 'left-0 top-0 -translate-x-1/2 -translate-y-1/2', cursor: 'nwse-resize', label: 'top-left corner' },
-  { mode: 'n', className: 'left-1/2 top-0 -translate-x-1/2 -translate-y-1/2', cursor: 'ns-resize', label: 'top edge' },
-  { mode: 'ne', className: 'right-0 top-0 translate-x-1/2 -translate-y-1/2', cursor: 'nesw-resize', label: 'top-right corner' },
-  { mode: 'e', className: 'right-0 top-1/2 translate-x-1/2 -translate-y-1/2', cursor: 'ew-resize', label: 'right edge' },
-  { mode: 'se', className: 'right-0 bottom-0 translate-x-1/2 translate-y-1/2', cursor: 'nwse-resize', label: 'bottom-right corner' },
-  { mode: 's', className: 'left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2', cursor: 'ns-resize', label: 'bottom edge' },
-  { mode: 'sw', className: 'left-0 bottom-0 -translate-x-1/2 translate-y-1/2', cursor: 'nesw-resize', label: 'bottom-left corner' },
-  { mode: 'w', className: 'left-0 top-1/2 -translate-x-1/2 -translate-y-1/2', cursor: 'ew-resize', label: 'left edge' },
+// The handles are decorative (aria-hidden); keyboard users resize with Alt + arrow keys instead.
+const HANDLES: { mode: DragMode; className: string; cursor: string }[] = [
+  { mode: 'nw', className: 'left-0 top-0 -translate-x-1/2 -translate-y-1/2', cursor: 'nwse-resize' },
+  { mode: 'n', className: 'left-1/2 top-0 -translate-x-1/2 -translate-y-1/2', cursor: 'ns-resize' },
+  { mode: 'ne', className: 'right-0 top-0 translate-x-1/2 -translate-y-1/2', cursor: 'nesw-resize' },
+  { mode: 'e', className: 'right-0 top-1/2 translate-x-1/2 -translate-y-1/2', cursor: 'ew-resize' },
+  { mode: 'se', className: 'right-0 bottom-0 translate-x-1/2 translate-y-1/2', cursor: 'nwse-resize' },
+  { mode: 's', className: 'left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2', cursor: 'ns-resize' },
+  { mode: 'sw', className: 'left-0 bottom-0 -translate-x-1/2 translate-y-1/2', cursor: 'nesw-resize' },
+  { mode: 'w', className: 'left-0 top-1/2 -translate-x-1/2 -translate-y-1/2', cursor: 'ew-resize' },
 ]
 
 export function PhotoEditor({ photo, edits, onChange }: PhotoEditorProps) {
+  const { t } = useI18n()
   const stageRef = useRef<HTMLDivElement>(null)
   const drag = useRef<{ mode: DragMode; startX: number; startY: number; start: PhotoEdits['crop'] } | null>(null)
 
@@ -73,10 +76,10 @@ export function PhotoEditor({ photo, edits, onChange }: PhotoEditorProps) {
     <div>
       <div className="flex flex-wrap items-center gap-2">
         <Button size="sm" variant="secondary" onClick={() => rotate(-1)} icon={<RotateCcw className="size-4" aria-hidden="true" />}>
-          Rotate left
+          {t('upload.editor.rotateLeft')}
         </Button>
         <Button size="sm" variant="secondary" onClick={() => rotate(1)} icon={<RotateCw className="size-4" aria-hidden="true" />}>
-          Rotate right
+          {t('upload.editor.rotateRight')}
         </Button>
         <Button
           size="sm"
@@ -85,11 +88,11 @@ export function PhotoEditor({ photo, edits, onChange }: PhotoEditorProps) {
           onClick={() => onChange({ ...edits, crop: FULL_RECT })}
           icon={<Undo2 className="size-4" aria-hidden="true" />}
         >
-          Reset crop
+          {t('upload.editor.resetCrop')}
         </Button>
         <p className="ml-auto flex items-center gap-1.5 text-xs text-muted">
           <Crop className="size-3.5" aria-hidden="true" />
-          Drag the frame to crop around the face
+          {t('upload.editor.dragHint')}
         </p>
       </div>
 
@@ -98,7 +101,7 @@ export function PhotoEditor({ photo, edits, onChange }: PhotoEditorProps) {
           <CanvasPreview
             source={photo.canvas}
             turns={edits.turns}
-            label="Photo preview"
+            label={t('upload.editor.preview')}
             maxSide={1100}
             className="block max-h-[62dvh] w-auto max-w-full rounded-lg"
           />
@@ -118,7 +121,7 @@ export function PhotoEditor({ photo, edits, onChange }: PhotoEditorProps) {
           <div
             role="group"
             tabIndex={0}
-            aria-label="Crop area. Arrow keys move it; Alt plus arrow keys resize it."
+            aria-label={t('upload.editor.cropArea')}
             onKeyDown={onKeyDown}
             onPointerDown={(event) => beginDrag(event, 'move')}
             onPointerMove={onPointerMove}

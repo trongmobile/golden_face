@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CameraModal } from '@/features/camera/CameraModal'
 import { checkCameraSupport, describeCameraError } from '@/features/camera/camera-errors'
+import { I18nProvider, translate, useI18n } from '@/i18n'
 import { installCameraMock, type CameraMock } from './helpers/camera-mock'
 
 let camera: CameraMock
@@ -374,5 +375,85 @@ describe('dialog accessibility', () => {
     expect(document.body.style.overflow).toBe('hidden')
     await user.click(screen.getByRole('button', { name: 'Close dialog' }))
     expect(document.body.style.overflow).not.toBe('hidden')
+  })
+})
+
+describe('in Vietnamese', () => {
+  /** Lets a test change the language while the dialog is open. */
+  function LanguageButtons() {
+    const { setLang } = useI18n()
+    return (
+      <>
+        <button onClick={() => setLang('vi')}>to-vi</button>
+        <button onClick={() => setLang('en')}>to-en</button>
+      </>
+    )
+  }
+
+  it('shows the dialog, preview label and controls in Vietnamese', async () => {
+    render(
+      <I18nProvider initialLang="vi">
+        <Harness />
+      </I18nProvider>,
+    )
+    const shutter = await screen.findByRole('button', { name: 'Chụp ảnh' })
+    expect(shutter).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Chụp ảnh' })).toBeInTheDocument()
+    expect(screen.getByText('Nhìn thẳng vào camera, giữ vẻ mặt thư giãn và dùng ánh sáng đều.')).toBeInTheDocument()
+    expect(screen.getByLabelText('Xem trước camera trực tiếp')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Hủy' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Đóng hộp thoại' })).toBeInTheDocument()
+  })
+
+  it('translates the capture result and its buttons', async () => {
+    const user = userEvent.setup()
+    render(
+      <I18nProvider initialLang="vi">
+        <Harness />
+      </I18nProvider>,
+    )
+    await user.click(await screen.findByRole('button', { name: 'Chụp ảnh' }))
+    expect(screen.getByRole('img', { name: 'Ảnh bạn vừa chụp' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Chụp lại' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Dùng ảnh này' })).toBeInTheDocument()
+  })
+
+  it('describes a blocked camera in Vietnamese and offers the way forward', async () => {
+    camera.restore()
+    camera = installCameraMock({ reject: { name: 'NotAllowedError' } })
+    render(
+      <I18nProvider initialLang="vi">
+        <Harness />
+      </I18nProvider>,
+    )
+    expect(await screen.findByText('Quyền truy cập camera đã bị chặn')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent(/GoldenFace không thể dùng camera/)
+    expect(screen.getByRole('button', { name: 'Thử lại' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Tải ảnh lên thay thế' })).toBeInTheDocument()
+  })
+
+  it('re-translates an error that is already on screen when the language changes', async () => {
+    camera.restore()
+    camera = installCameraMock({ reject: { name: 'NotFoundError' } })
+    const user = userEvent.setup()
+    render(
+      <I18nProvider initialLang="en">
+        <LanguageButtons />
+        <Harness />
+      </I18nProvider>,
+    )
+    expect(await screen.findByText('No camera found')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'to-vi' }))
+    expect(screen.getByText('Không tìm thấy camera')).toBeInTheDocument()
+    expect(screen.queryByText('No camera found')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'to-en' }))
+    expect(screen.getByText('No camera found')).toBeInTheDocument()
+  })
+
+  it('camera errors carry language-independent messages, not text', () => {
+    const error = describeCameraError(new DOMException('', 'NotAllowedError'))
+    expect(error.title).toEqual({ key: 'camera.errors.denied.title' })
+    expect(translate('en', error.title)).toBe('Camera permission was blocked')
+    expect(translate('vi', error.title)).toBe('Quyền truy cập camera đã bị chặn')
   })
 })

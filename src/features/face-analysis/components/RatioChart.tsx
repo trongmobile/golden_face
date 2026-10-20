@@ -9,26 +9,27 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { useI18n } from '@/i18n'
 import type { MetricResult } from '@/types'
 import { PHI } from '../golden-ratio'
 import type { MetricId } from '../metric-catalog'
 
-const SHORT_LABELS: Partial<Record<MetricId, string>> = {
-  'face-length-width': 'Face length ÷ width',
-  'mouth-nose': 'Mouth ÷ nose width',
-  'lip-ratio': 'Lower ÷ upper lip',
-}
+/** Metrics that can be charted, with a short axis label (`results.chart.shortLabels.<id>`). */
+const CHARTED: readonly MetricId[] = ['face-length-width', 'mouth-nose', 'lip-ratio']
 
 // Neutral, non-evaluative colours: navy for the measurement, accent for the reference.
 const MEASURED = '#12263a'
 const REFERENCE = '#2b8f88'
 
 export function RatioChart({ metrics }: { metrics: MetricResult[] }) {
+  const { t } = useI18n()
   const data = metrics.flatMap((metric) =>
     metric.status === 'ok' && metric.golden
       ? [
           {
-            name: SHORT_LABELS[metric.id] ?? metric.id,
+            name: CHARTED.includes(metric.id)
+              ? t(`results.chart.shortLabels.${metric.id as 'face-length-width' | 'mouth-nose' | 'lip-ratio'}`)
+              : metric.id,
             measured: Number(metric.golden.ratio.toFixed(3)),
             reference: Number(PHI.toFixed(3)),
           },
@@ -39,16 +40,17 @@ export function RatioChart({ metrics }: { metrics: MetricResult[] }) {
   if (data.length === 0) {
     return (
       <p className="rounded-2xl border border-dashed border-line-strong bg-mist p-5 text-sm text-muted">
-        None of the ratios that have a golden-ratio comparison could be measured on this photo, so there is
-        nothing to chart.
+        {t('results.chart.empty')}
       </p>
     )
   }
 
-  const summary = data.map((row) => `${row.name}: measured ${row.measured}, reference ${row.reference}`).join('; ')
+  const summary = data
+    .map((row) => t('results.chart.summaryRow', { name: row.name, measured: row.measured, reference: row.reference }))
+    .join('; ')
 
   return (
-    <div role="img" aria-label={`Bar chart comparing measured ratios with the golden ratio. ${summary}.`} className="h-72 w-full">
+    <div role="img" aria-label={t('results.chart.ariaLabel', { summary })} className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 12, right: 12, bottom: 8, left: -12 }} barGap={6}>
           <CartesianGrid vertical={false} stroke="#dce5e9" />
@@ -66,8 +68,8 @@ export function RatioChart({ metrics }: { metrics: MetricResult[] }) {
           />
           <Legend iconType="circle" wrapperStyle={{ fontSize: 13, paddingTop: 8 }} />
           <ReferenceLine y={PHI} stroke="#145a56" strokeDasharray="5 5" />
-          <Bar dataKey="measured" name="Measured ratio (larger ÷ smaller)" fill={MEASURED} radius={[6, 6, 0, 0]} isAnimationActive={false} maxBarSize={44} />
-          <Bar dataKey="reference" name="Reference φ ≈ 1.618" fill={REFERENCE} radius={[6, 6, 0, 0]} isAnimationActive={false} maxBarSize={44} />
+          <Bar dataKey="measured" name={t('results.chart.measured')} fill={MEASURED} radius={[6, 6, 0, 0]} isAnimationActive={false} maxBarSize={44} />
+          <Bar dataKey="reference" name={t('results.chart.reference')} fill={REFERENCE} radius={[6, 6, 0, 0]} isAnimationActive={false} maxBarSize={44} />
         </BarChart>
       </ResponsiveContainer>
     </div>

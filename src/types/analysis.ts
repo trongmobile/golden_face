@@ -1,19 +1,23 @@
+import type { Msg } from '@/i18n'
 import type { GoldenComparison } from '@/features/face-analysis/golden-ratio'
-import type { MetricId, SegmentId } from '@/features/face-analysis/metric-catalog'
 import type { Frame } from '@/features/face-analysis/geometry'
+import type { MidlineFeatureId, SymmetryPairId } from '@/features/face-analysis/landmarks'
+import type { MetricId, SegmentId } from '@/features/face-analysis/metric-catalog'
 import type { ImageSize, Landmark, Point } from './base'
 
-/** A single measured distance, in image pixels. */
+/**
+ * A single measured distance, in image pixels. Its name is `metrics.segments.<id>` in the
+ * dictionary; analysis results carry ids and `Msg`s, never text in one language.
+ */
 export interface MeasuredSegment {
   id: SegmentId
-  label: string
   /** Length measured in the face-aligned frame (so head tilt does not change it). */
   value: number
   /** End points of the line that is drawn on the photo. */
   from: Point
   to: Point
   /** Where the measurement comes from, e.g. "Landmarks 234 ↔ 454". */
-  source: string
+  source: Msg
   /** Landmark indices that define the segment (drawn as dots). */
   landmarks: number[]
 }
@@ -36,17 +40,16 @@ export interface RatioMetricResult {
 export interface SkippedMetricResult {
   status: 'skipped'
   id: MetricId
-  reason: string
+  reason: Msg
 }
 
 export type MetricResult = RatioMetricResult | SkippedMetricResult
 
 export type LevelId = 'mesh-top' | 'hairline' | 'brow' | 'nose-base' | 'chin'
 
-/** A horizontal reference line across the face (perpendicular to the face axis). */
+/** A horizontal reference line across the face (perpendicular to the face axis). Named `metrics.levels.<id>`. */
 export interface FaceLevel {
   id: LevelId
-  label: string
   /** Position along the face's vertical axis (frame coordinate). */
   b: number
 }
@@ -61,8 +64,8 @@ export interface ThirdsSummary {
 }
 
 export interface SymmetryPairResult {
-  id: string
-  label: string
+  /** Named `metrics.symmetryPairs.<id>`. */
+  id: SymmetryPairId
   rightLandmark: number
   leftLandmark: number
   right: Point
@@ -79,8 +82,8 @@ export interface SymmetryPairResult {
 }
 
 export interface MidlineFeatureResult {
-  id: string
-  label: string
+  /** Named `metrics.midlineFeatures.<id>`. */
+  id: MidlineFeatureId
   point: Point
   /** Signed offset from the midline as a percentage of face width. Positive = toward the subject's left. */
   offsetPct: number
@@ -89,7 +92,7 @@ export interface MidlineFeatureResult {
 export interface SymmetryReport {
   midline: { top: Point; bottom: Point } | null
   pairs: SymmetryPairResult[]
-  skippedPairs: { id: string; label: string; reason: string }[]
+  skippedPairs: { id: SymmetryPairId; reason: Msg }[]
   features: MidlineFeatureResult[]
   meanHorizontalDeviationPct: number | null
   meanVerticalOffsetPct: number | null
@@ -99,7 +102,7 @@ export interface SymmetryReport {
 export type HairlineState =
   | { status: 'none' }
   | { status: 'user'; point: Point }
-  | { status: 'invalid'; reason: string }
+  | { status: 'invalid'; reason: Msg }
 
 export interface FaceMeasurements {
   frame: Frame
@@ -108,7 +111,7 @@ export interface FaceMeasurements {
   /** Position of the symmetry axis along the frame's left/right axis. */
   axisOffset: number
   segments: Partial<Record<SegmentId, MeasuredSegment>>
-  skippedSegments: Partial<Record<SegmentId, string>>
+  skippedSegments: Partial<Record<SegmentId, Msg>>
   levels: FaceLevel[]
   metrics: MetricResult[]
   thirds: ThirdsSummary
@@ -120,10 +123,10 @@ export type QualityStatus = 'pass' | 'warn' | 'fail'
 
 export interface QualityCheck {
   id: string
-  label: string
+  label: Msg
   status: QualityStatus
   /** Plain-language explanation shown to the user. */
-  detail: string
+  detail: Msg
 }
 
 export type Reliability = 'good' | 'fair' | 'limited'

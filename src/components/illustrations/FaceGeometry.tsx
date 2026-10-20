@@ -1,3 +1,4 @@
+import { useI18n } from '@/i18n'
 import { cn } from '@/utils/cn'
 
 /**
@@ -6,6 +7,7 @@ import { cn } from '@/utils/cn'
  * Purely illustrative — it is not generated from any photo.
  */
 export function FaceGeometry({ className }: { className?: string }) {
+  const { t } = useI18n()
   const gold = 'var(--color-accent-500)'
   const goldDeep = 'var(--color-accent-700)'
   const ink = 'var(--color-navy)'
@@ -14,7 +16,7 @@ export function FaceGeometry({ className }: { className?: string }) {
     <svg
       viewBox="0 0 420 520"
       role="img"
-      aria-label="Illustration of a face outline inside a golden rectangle, with the golden spiral and measurement lines"
+      aria-label={t('home.illustration.label')}
       className={cn('h-auto w-full', className)}
     >
       {/* soft backdrop */}
@@ -84,10 +86,10 @@ export function FaceGeometry({ className }: { className?: string }) {
       {/* labels */}
       <g fontFamily="var(--font-sans)" fontSize="11" fontWeight="600" letterSpacing="0.08em" fill={goldDeep}>
         <text x="318" y="106">φ 1.618</text>
-        <text x="318" y="428">L : W</text>
-        <text x="30" y="226">eyes</text>
-        <text x="30" y="294">nose</text>
-        <text x="30" y="340">mouth</text>
+        <text x="318" y="428">{t('home.illustration.lengthWidth')}</text>
+        <text x="30" y="226">{t('home.illustration.eyes')}</text>
+        <text x="30" y="294">{t('home.illustration.nose')}</text>
+        <text x="30" y="340">{t('home.illustration.mouth')}</text>
       </g>
       <g stroke={goldDeep} strokeWidth="1" opacity="0.8">
         <path d="M330 120 V412" />

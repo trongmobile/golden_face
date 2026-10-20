@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
+import { useI18n } from '@/i18n'
 import { cn } from '@/utils/cn'
 
 const FOCUSABLE =
@@ -22,6 +23,7 @@ interface ModalProps {
  * they own (like a camera stream) is cleaned up automatically.
  */
 export function Modal({ open, onClose, title, description, children, className }: ModalProps) {
+  const { t } = useI18n()
   const dialogRef = useRef<HTMLDivElement>(null)
   const onCloseRef = useRef(onClose)
   const titleId = useId()
@@ -102,7 +104,7 @@ export function Modal({ open, onClose, title, description, children, className }
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close dialog"
+            aria-label={t('common.closeDialog')}
             className="-mr-2 grid size-10 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-accent-100 hover:text-ink"
           >
             <X className="size-5" aria-hidden="true" />

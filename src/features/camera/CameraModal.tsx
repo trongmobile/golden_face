@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button'
 import { CanvasPreview } from '@/components/ui/CanvasPreview'
 import { Modal } from '@/components/ui/Modal'
 import { releaseCanvas } from '@/features/image-upload/image-utils'
+import { msg, useI18n, type Msg } from '@/i18n'
 import { cn } from '@/utils/cn'
 import { useCamera } from './useCamera'
 
@@ -22,13 +23,9 @@ interface CameraModalProps {
  * unmounted when the dialog closes — that is what guarantees the camera is released.
  */
 export function CameraModal({ open, onClose, onCapture, autoStart = true }: CameraModalProps) {
+  const { t } = useI18n()
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="Take a photo"
-      description="Face the camera, keep a relaxed expression and use even lighting."
-    >
+    <Modal open={open} onClose={onClose} title={t('camera.modal.title')} description={t('camera.modal.description')}>
       <CameraSession autoStart={autoStart} onCapture={onCapture} onClose={onClose} />
     </Modal>
   )
@@ -43,10 +40,11 @@ function CameraSession({
   onCapture: (canvas: HTMLCanvasElement) => void
   onClose: () => void
 }) {
+  const { t } = useI18n()
   const camera = useCamera()
   const { start, stop, capture, status, error, facingMode, canSwitch, videoRef, switchCamera } = camera
   const [captured, setCaptured] = useState<HTMLCanvasElement | null>(null)
-  const [captureError, setCaptureError] = useState<string | null>(null)
+  const [captureError, setCaptureError] = useState<Msg | null>(null)
   const handedOff = useRef(false)
   const capturedRef = useRef<HTMLCanvasElement | null>(null)
 
@@ -69,7 +67,7 @@ function CameraSession({
   const takePhoto = () => {
     const frame = capture()
     if (!frame) {
-      setCaptureError('The camera is not ready yet. Wait for the preview to appear, then try again.')
+      setCaptureError(msg('camera.notReady'))
       return
     }
     setCaptureError(null)
@@ -101,11 +99,10 @@ function CameraSession({
             <Camera className="size-6" aria-hidden="true" />
           </span>
           <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-muted">
-            GoldenFace needs permission to use your camera. The picture stays on this device and the camera switches
-            off as soon as you take it.
+            {t('camera.intro')}
           </p>
           <Button className="mt-5" onClick={() => void start('user')} icon={<Camera className="size-4" aria-hidden="true" />}>
-            Start camera
+            {t('camera.startCamera')}
           </Button>
         </div>
       )}
@@ -113,28 +110,28 @@ function CameraSession({
       {status === 'starting' && (
         <div role="status" className="flex items-center gap-3 rounded-2xl bg-accent-50 p-4 text-sm text-ink">
           <Loader2 className="size-5 shrink-0 animate-spin text-accent-700" aria-hidden="true" />
-          Waiting for camera access — choose “Allow” when your browser asks.
+          {t('camera.waiting')}
         </div>
       )}
 
       {status === 'error' && error && (
         <Alert
           tone="error"
-          title={error.title}
+          title={t(error.title)}
           actions={
             <>
               {error.kind !== 'unsupported' && error.kind !== 'insecure' && (
                 <Button size="sm" variant="secondary" onClick={() => void start(facingMode)} icon={<RefreshCw className="size-4" aria-hidden="true" />}>
-                  Try again
+                  {t('camera.tryAgain')}
                 </Button>
               )}
               <Button size="sm" variant="primary" onClick={onClose} icon={<ImagePlus className="size-4" aria-hidden="true" />}>
-                Upload a photo instead
+                {t('camera.uploadInstead')}
               </Button>
             </>
           }
         >
-          {error.message}
+          {t(error.message)}
         </Alert>
       )}
 
@@ -145,7 +142,7 @@ function CameraSession({
           playsInline
           muted
           autoPlay
-          aria-label="Live camera preview"
+          aria-label={t('camera.livePreview')}
           className={cn('mx-auto block max-h-[62dvh] w-full object-contain', mirrored && '-scale-x-100')}
         />
         {status === 'active' && (
@@ -162,34 +159,34 @@ function CameraSession({
 
       {captured && (
         <div className="overflow-hidden rounded-card bg-ink">
-          <CanvasPreview source={captured} label="The photo you just took" maxSide={1000} className="mx-auto block max-h-[62dvh] w-auto max-w-full" />
+          <CanvasPreview source={captured} label={t('camera.capturedPhoto')} maxSide={1000} className="mx-auto block max-h-[62dvh] w-auto max-w-full" />
         </div>
       )}
 
-      {captureError && <Alert tone="warning">{captureError}</Alert>}
+      {captureError && <Alert tone="warning">{t(captureError)}</Alert>}
 
       {status === 'active' && !captured && (
         <>
-          <p className="text-center text-sm text-muted">Center your face in the oval and look straight at the lens.</p>
+          <p className="text-center text-sm text-muted">{t('camera.centerHint')}</p>
           <div className="flex items-center justify-between gap-3">
             <div className="w-28">
               {canSwitch && (
                 <Button size="sm" variant="secondary" onClick={() => void switchCamera()} icon={<SwitchCamera className="size-4" aria-hidden="true" />}>
-                  Switch camera
+                  {t('camera.switchCamera')}
                 </Button>
               )}
             </div>
             <button
               type="button"
               onClick={takePhoto}
-              aria-label="Take photo"
+              aria-label={t('camera.takePhoto')}
               className="grid size-[4.5rem] place-items-center rounded-full border-4 border-accent-500 bg-paper shadow-soft transition-transform active:scale-95"
             >
               <span className="size-12 rounded-full bg-navy" />
             </button>
             <div className="flex w-28 justify-end">
               <Button size="sm" variant="ghost" onClick={onClose}>
-                Cancel
+                {t('camera.cancel')}
               </Button>
             </div>
           </div>
@@ -199,10 +196,10 @@ function CameraSession({
       {captured && (
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button variant="secondary" onClick={retake} icon={<RotateCcw className="size-4" aria-hidden="true" />}>
-            Retake
+            {t('camera.retake')}
           </Button>
           <Button variant="primary" onClick={usePhoto} icon={<CheckCircle2 className="size-4" aria-hidden="true" />}>
-            Use this photo
+            {t('camera.usePhoto')}
           </Button>
         </div>
       )}

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AnalysisError } from '@/features/face-analysis/analyze'
+import { I18nProvider, msg, useI18n } from '@/i18n'
 import { AnalysisPage } from '@/pages/Analysis'
 import type { AnalysisResult } from '@/types'
 import { installCameraMock, type CameraMock } from './helpers/camera-mock'
@@ -58,7 +59,7 @@ describe('choosing a photo', () => {
     expect(screen.getByText('Drag & drop a photo here')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Choose a photo' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Open camera' })).toBeInTheDocument()
-    expect(screen.getByText(/never uploaded/i)).toBeInTheDocument()
+    expect(screen.getByText(/never stored/i)).toBeInTheDocument()
     expect(screen.getByText(/Face the camera straight on/)).toBeInTheDocument()
   })
 
@@ -372,7 +373,17 @@ describe('error states', () => {
     const quality = fakeAnalysisResult().quality
     failWith(
       new AnalysisError('pose-too-large', 'The head is turned about 30° sideways.', {
-        quality: { ...quality, checks: [{ id: 'yaw', label: 'Facing the camera', status: 'fail', detail: 'Turned.' }] },
+        quality: {
+          ...quality,
+          checks: [
+            {
+              id: 'yaw',
+              label: msg('quality.checks.yaw.labelNoPose'),
+              status: 'fail',
+              detail: msg('quality.checks.yaw.turned', { deg: 30 }),
+            },
+          ],
+        },
       }),
     )
     const user = userEvent.setup()
@@ -431,5 +442,96 @@ describe('camera entry points', () => {
     expect(screen.getByText(/not supported here/i)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Open camera' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Choose a photo' })).toBeInTheDocument()
+  })
+})
+
+describe('in Vietnamese', () => {
+  function LanguageButtons() {
+    const { setLang } = useI18n()
+    return (
+      <>
+        <button onClick={() => setLang('vi')}>to-vi</button>
+        <button onClick={() => setLang('en')}>to-en</button>
+      </>
+    )
+  }
+
+  function renderVietnamese(initialLang: 'vi' | 'en' = 'vi') {
+    return render(
+      <I18nProvider initialLang={initialLang}>
+        <LanguageButtons />
+        <MemoryRouter initialEntries={['/analysis']}>
+          <AnalysisPage />
+        </MemoryRouter>
+      </I18nProvider>,
+    )
+  }
+
+  it('shows the upload step, dropzone and camera card in Vietnamese', () => {
+    renderVietnamese()
+    expect(screen.getByRole('heading', { name: 'Phân tích ảnh' })).toBeInTheDocument()
+    expect(screen.getByText('Kéo và thả ảnh vào đây')).toBeInTheDocument()
+    expect(screen.getByText('hoặc chọn một ảnh từ thiết bị của bạn')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Chọn ảnh' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Mở camera' })).toBeInTheDocument()
+    expect(screen.getByText(/JPG, PNG hoặc WebP · tối đa 15 MB/)).toBeInTheDocument()
+    expect(screen.getByText(/Nhìn thẳng vào camera, cằm ngang/)).toBeInTheDocument()
+    expect(document.title).toBe('Phân tích ảnh — GoldenFace')
+  })
+
+  it('shows the photo editor step in Vietnamese after a valid upload', async () => {
+    const user = userEvent.setup()
+    renderVietnamese()
+    await user.upload(screen.getByTestId('photo-input'), jpeg('chandung.jpg'))
+    expect(await screen.findByRole('heading', { name: 'Kiểm tra ảnh của bạn' })).toBeInTheDocument()
+    expect(screen.getByText('Bước 2 / 3')).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Xem trước ảnh' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Xoay trái' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Xoay phải' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Đặt lại vùng cắt' })).toBeInTheDocument()
+    expect(screen.getByRole('group', { name: /Vùng cắt/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Phân tích ảnh này' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Chọn ảnh khác' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Chụp ảnh mới' })).toBeInTheDocument()
+  })
+
+  it('translates a file error, and re-translates it when the language changes', async () => {
+    const user = userEvent.setup({ applyAccept: false })
+    renderVietnamese('en')
+    await user.upload(screen.getByTestId('photo-input'), new File(['hello'], 'notes.txt', { type: 'text/plain' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Unsupported file type. Please use a JPG, PNG or WebP image.')
+    await user.click(screen.getByRole('button', { name: 'to-vi' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('Không thể dùng ảnh này')
+    expect(screen.getByRole('alert')).toHaveTextContent('Loại tệp không được hỗ trợ. Vui lòng dùng ảnh JPG, PNG hoặc WebP.')
+  })
+
+  it('translates the oversized-file message with its numbers', async () => {
+    const user = userEvent.setup()
+    renderVietnamese()
+    const big = new File([new Uint8Array(16 * 1024 * 1024)], 'huge.jpg', { type: 'image/jpeg' })
+    await user.upload(screen.getByTestId('photo-input'), big)
+    expect(await screen.findByRole('alert')).toHaveTextContent('Ảnh này nặng 16.0 MB. Giới hạn là 15 MB')
+  })
+
+  it('announces progress to screen readers in Vietnamese', async () => {
+    const user = userEvent.setup()
+    analyzeFaceMock.mockReturnValue(new Promise(() => undefined)) // stays "analyzing"
+    renderVietnamese()
+    await user.upload(screen.getByTestId('photo-input'), jpeg())
+    await screen.findByRole('heading', { name: 'Kiểm tra ảnh của bạn' })
+    expect(document.querySelector('[aria-live="polite"]')).toHaveTextContent(
+      'Đã tải ảnh. Hãy kiểm tra, rồi chọn Phân tích ảnh này.',
+    )
+    await user.click(screen.getByRole('button', { name: 'Phân tích ảnh này' }))
+    await waitFor(() =>
+      expect(document.querySelector('[aria-live="polite"]')).toHaveTextContent('Đang phân tích ảnh của bạn trên thiết bị này.'),
+    )
+  })
+
+  it('opens the camera dialog in Vietnamese from the camera card', async () => {
+    const user = userEvent.setup()
+    renderVietnamese()
+    await user.click(screen.getByRole('button', { name: 'Mở camera' }))
+    expect(await screen.findByRole('dialog', { name: 'Chụp ảnh' })).toBeInTheDocument()
   })
 })

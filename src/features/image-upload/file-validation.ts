@@ -1,3 +1,5 @@
+import { msg, translate, type Msg } from '@/i18n'
+
 export const ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const
 export type AcceptedMimeType = (typeof ACCEPTED_MIME_TYPES)[number]
 
@@ -11,11 +13,15 @@ export type ImageFileErrorCode = 'empty' | 'too-large' | 'unsupported-type' | 'u
 
 export class ImageFileError extends Error {
   readonly code: ImageFileErrorCode
+  /** What the interface shows, in the visitor's language (`t(error.msg)`). */
+  readonly msg: Msg
 
-  constructor(code: ImageFileErrorCode, message: string, options?: { cause?: unknown }) {
-    super(message, options)
+  /** `message` is the English text of `msg`, for developers and logs only — never render it. */
+  constructor(code: ImageFileErrorCode, message: Msg, options?: { cause?: unknown }) {
+    super(translate('en', message), options)
     this.name = 'ImageFileError'
     this.code = code
+    this.msg = message
   }
 }
 
@@ -85,30 +91,27 @@ export async function readBytes(blob: Blob): Promise<Uint8Array> {
  */
 export async function validateImageFile(file: File): Promise<AcceptedMimeType> {
   if (file.size === 0) {
-    throw new ImageFileError('empty', 'This file is empty. Please choose a different photo.')
+    throw new ImageFileError('empty', msg('upload.errors.empty'))
   }
   if (file.size > MAX_FILE_BYTES) {
     throw new ImageFileError(
       'too-large',
-      `This photo is ${(file.size / (1024 * 1024)).toFixed(1)} MB. The limit is ${MAX_FILE_MB} MB — try a smaller or compressed copy.`,
+      msg('upload.errors.tooLarge', { size: (file.size / (1024 * 1024)).toFixed(1), limit: MAX_FILE_MB }),
     )
   }
   const declared = declaredType(file)
   if (!declared) {
-    throw new ImageFileError('unsupported-type', 'Unsupported file type. Please use a JPG, PNG or WebP image.')
+    throw new ImageFileError('unsupported-type', msg('upload.errors.unsupportedType'))
   }
   let head: Uint8Array
   try {
     head = await readBytes(file.slice(0, 16))
   } catch (error) {
-    throw new ImageFileError('unreadable', 'This file could not be read. Please try again.', { cause: error })
+    throw new ImageFileError('unreadable', msg('upload.errors.unreadable'), { cause: error })
   }
   const actual = sniffImageType(head)
   if (!actual) {
-    throw new ImageFileError(
-      'unsupported-type',
-      'This file does not look like a real JPG, PNG or WebP image, so it cannot be analyzed.',
-    )
+    throw new ImageFileError('unsupported-type', msg('upload.errors.notRealImage'))
   }
   return actual
 }

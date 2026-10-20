@@ -1,8 +1,8 @@
+import { englishT, type MsgKey, type Translate } from '@/i18n'
 import type { AnalysisResult, FaceMeasurements } from '@/types'
 import { releaseCanvas } from '@/features/image-upload/image-utils'
 import { formatPercent, formatRatio, formatShare } from '@/utils/format'
 import { DEFAULT_SIMILARITY_K, PHI } from './golden-ratio'
-import { METRIC_BY_ID } from './metric-catalog'
 import { faceRegion, paintAnnotated, roundedRectPath, type OverlayLayer } from './overlay'
 
 export interface ReportInput {
@@ -10,6 +10,16 @@ export interface ReportInput {
   result: AnalysisResult
   measurements: FaceMeasurements
   layers: ReadonlySet<OverlayLayer>
+  /** Translates the report text. Defaults to English. */
+  t?: Translate
+  /** Locale for the date shown in the header (BCP 47). Defaults to the browser's. */
+  locale?: string
+}
+
+const THIRD_PART: Record<'upper' | 'middle' | 'lower', MsgKey> = {
+  upper: 'results.report.thirdUpper',
+  middle: 'results.report.thirdMiddle',
+  lower: 'results.report.thirdLower',
 }
 
 const WIDTH = 1240
@@ -50,7 +60,14 @@ function paragraph(ctx: Context, text: string, x: number, y: number, maxWidth: n
 }
 
 /** Renders the complete report (photo with overlay + numbers + caveats) onto a new canvas. */
-export function renderReportCanvas({ image, result, measurements, layers }: ReportInput): HTMLCanvasElement {
+export function renderReportCanvas({
+  image,
+  result,
+  measurements,
+  layers,
+  t = englishT,
+  locale,
+}: ReportInput): HTMLCanvasElement {
   const scratch = document.createElement('canvas')
   scratch.width = WIDTH
   scratch.height = 3600
@@ -70,9 +87,9 @@ export function renderReportCanvas({ image, result, measurements, layers }: Repo
   ctx.fillText('Face', PAD + goldenWidth, PAD + 36)
   ctx.fillStyle = MUTED
   ctx.font = `400 18px ${FONT}`
-  ctx.fillText('Facial proportion report', PAD, PAD + 66)
+  ctx.fillText(t('results.report.subtitle'), PAD, PAD + 66)
   ctx.textAlign = 'right'
-  ctx.fillText(new Date(result.analyzedAt).toLocaleString(), WIDTH - PAD, PAD + 36)
+  ctx.fillText(new Date(result.analyzedAt).toLocaleString(locale), WIDTH - PAD, PAD + 36)
   ctx.textAlign = 'left'
   ctx.strokeStyle = LINE
   ctx.lineWidth = 2
@@ -97,7 +114,7 @@ export function renderReportCanvas({ image, result, measurements, layers }: Repo
   composed.height = Math.max(1, Math.round(region.height * renderScale))
   const composedContext = composed.getContext('2d')
   if (composedContext) {
-    paintAnnotated(composedContext, image, result, measurements, { layers, highlight: null, labels: true }, region, renderScale)
+    paintAnnotated(composedContext, image, result, measurements, { layers, highlight: null, labels: true, t }, region, renderScale)
     ctx.save()
     ctx.beginPath()
     roundedRectPath(ctx, PAD, top, drawWidth, drawHeight, 18)
@@ -113,15 +130,14 @@ export function renderReportCanvas({ image, result, measurements, layers }: Repo
   let y = top + 16
   ctx.fillStyle = ACCENT
   ctx.font = `600 13px ${FONT}`
-  ctx.fillText('PROPORTIONS', colX, y)
+  ctx.fillText(t('results.report.proportions').toUpperCase(), colX, y)
   y += 12
 
   for (const metric of measurements.metrics) {
-    const definition = METRIC_BY_ID[metric.id]
     y += 28
     ctx.fillStyle = INK
     ctx.font = `600 17px ${FONT}`
-    ctx.fillText(definition.label, colX, y)
+    ctx.fillText(t(`metrics.items.${metric.id}.label`), colX, y)
     if (metric.status === 'ok') {
       ctx.textAlign = 'right'
       ctx.font = `500 24px ${SERIF}`
@@ -132,7 +148,12 @@ export function renderReportCanvas({ image, result, measurements, layers }: Repo
         ctx.fillStyle = MUTED
         ctx.font = `400 14px ${FONT}`
         ctx.fillText(
-          `φ ${formatRatio(PHI)} · measured r ${formatRatio(metric.golden.ratio)} · deviation ${formatPercent(metric.golden.error * 100)} · similarity ${formatPercent(metric.golden.similarity, 0)}`,
+          t('results.report.golden', {
+            phi: formatRatio(PHI),
+            ratio: formatRatio(metric.golden.ratio),
+            deviation: formatPercent(metric.golden.error * 100),
+            similarity: formatPercent(metric.golden.similarity, 0),
+          }),
           colX,
           y,
         )
@@ -141,7 +162,7 @@ export function renderReportCanvas({ image, result, measurements, layers }: Repo
       y += 22
       ctx.fillStyle = MUTED
       ctx.font = `400 14px ${FONT}`
-      y = paragraph(ctx, `Not measured — ${metric.reason}`, colX, y, colWidth, 19) - 19
+      y = paragraph(ctx, t('results.report.notMeasured', { reason: t(metric.reason) }), colX, y, colWidth, 19) - 19
     }
     y += 12
     ctx.strokeStyle = LINE
@@ -169,37 +190,38 @@ export function renderReportCanvas({ image, result, measurements, layers }: Repo
   }
 
   const { thirds, symmetry } = measurements
-  section('Vertical thirds')
+  section(t('results.report.thirds'))
   body(
     (['upper', 'middle', 'lower'] as const)
       .map((key) => {
         const share = thirds.shares[key]
-        return `${key[0]!.toUpperCase()}${key.slice(1)}: ${share === null ? 'not measured' : formatShare(share)}`
+        return t('results.report.thirdItem', {
+          part: t(THIRD_PART[key]),
+          value: share === null ? t('results.report.thirdNotMeasured') : formatShare(share),
+        })
       })
       .join('   ·   '),
   )
   y += 14
 
-  section('Symmetry')
+  section(t('results.report.symmetry'))
   body(
     symmetry.meanHorizontalDeviationPct === null
-      ? 'Not measured.'
-      : `Average left–right difference ${formatPercent(symmetry.meanHorizontalDeviationPct)} of the distance to the midline; average height difference ${formatPercent(symmetry.meanVerticalOffsetPct ?? 0)} of face width. Every face has some natural asymmetry.`,
+      ? t('results.report.symmetryNone')
+      : t('results.report.symmetryText', {
+          side: formatPercent(symmetry.meanHorizontalDeviationPct),
+          height: formatPercent(symmetry.meanVerticalOffsetPct ?? 0),
+        }),
   )
   y += 14
 
-  section(`Capture quality: ${result.quality.reliability}`)
+  section(t('results.report.quality', { level: t(`results.report.levels.${result.quality.reliability}`) }))
   const notes = result.quality.checks.filter((check) => check.status !== 'pass')
-  body(notes.length === 0 ? 'No capture problems were found.' : notes.map((check) => `• ${check.detail}`).join(' '))
+  body(notes.length === 0 ? t('results.report.noProblems') : notes.map((check) => `• ${t(check.detail)}`).join(' '))
   y += 14
 
-  section('Please read')
-  body(
-    'The golden ratio (φ ≈ 1.618) is one geometric reference, not a standard of beauty or attractiveness. ' +
-      'Measurements come from a single 2D photo and are affected by camera angle, lens, lighting, expression and pose. ' +
-      `“Geometric similarity” = 100 · exp(−${DEFAULT_SIMILARITY_K} · |r − φ| / φ) and only describes closeness to φ. ` +
-      'This report was generated on your device; your photo was not uploaded.',
-  )
+  section(t('results.report.read'))
+  body(t('results.report.readText', { k: DEFAULT_SIMILARITY_K }))
 
   const finalHeight = y + PAD
   const output = document.createElement('canvas')

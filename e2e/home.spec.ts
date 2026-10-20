@@ -63,7 +63,7 @@ test.describe('home page', () => {
   test('the footer links to the privacy policy and terms', async ({ page }) => {
     await page.goto('/')
     const footer = page.getByRole('contentinfo')
-    await expect(footer.getByText(/never uploaded/i)).toBeVisible()
+    await expect(footer.getByText(/never stored/i)).toBeVisible()
     await footer.getByRole('link', { name: 'Terms of use' }).click()
     await expect(page).toHaveURL(/\/privacy#terms/)
     await expect(page.getByRole('heading', { name: 'Terms of use' })).toBeInViewport()

@@ -1,4 +1,5 @@
 import type { FaceLandmarkerResult } from '@mediapipe/tasks-vision'
+import { msg, translate, type Msg } from '@/i18n'
 import type { AnalysisResult, ImageSize, Landmark, QualityCheck, QualityReport } from '@/types'
 import { computeMeasurements, InvalidLandmarksError } from './measurements'
 import { poseFromLandmarks, poseFromTransformMatrix, type TransformMatrix } from './pose'
@@ -30,17 +31,27 @@ export class AnalysisError extends Error {
   readonly faceCount?: number
   /** Quality report attached when a capture-quality check rejected the photo. */
   readonly quality?: QualityReport
+  /**
+   * What the interface shows under the error title, in the visitor's language
+   * (`t(error.msg)`). `message` is English for developers and logs only — never render it.
+   */
+  readonly msg: Msg
 
   constructor(
     code: AnalysisErrorCode,
     message: string,
-    details: { faceCount?: number; quality?: QualityReport; cause?: unknown } = {},
+    details: { faceCount?: number; quality?: QualityReport; cause?: unknown; msg?: Msg } = {},
   ) {
     super(message, details.cause !== undefined ? { cause: details.cause } : undefined)
     this.name = 'AnalysisError'
     this.code = code
     this.faceCount = details.faceCount
     this.quality = details.quality
+    this.msg =
+      details.msg ??
+      (code === 'multiple-faces' && details.faceCount !== undefined
+        ? msg('analysisErrors.detail.multiple-faces', { count: details.faceCount })
+        : msg(`analysisErrors.detail.${code}`))
   }
 }
 
@@ -227,7 +238,8 @@ function errorForFailedChecks(failed: QualityCheck[], quality: QualityReport): A
         : first.id === 'yaw' || first.id === 'pitch'
           ? 'pose-too-large'
           : 'poor-lighting'
-  return new AnalysisError(code, first.detail, { quality })
+  // The specific failed check explains the problem, in the visitor's language.
+  return new AnalysisError(code, translate('en', first.detail), { quality, msg: first.detail })
 }
 
 /**
@@ -262,7 +274,7 @@ export async function analyzeFace(
       error instanceof ModelLoadError
         ? error.message
         : 'The face-analysis model could not be loaded. Check your connection and try again.',
-      { cause: error },
+      { cause: error, ...(error instanceof ModelLoadError ? { msg: error.msg } : {}) },
     )
   }
   throwIfAborted(signal)
@@ -298,7 +310,7 @@ export async function analyzeFace(
     throw new AnalysisError(
       'multiple-faces',
       `${significant.length} faces were found. GoldenFace measures one face at a time.`,
-      { faceCount: significant.length },
+      { faceCount: significant.length, msg: msg('analysisErrors.detail.multiple-faces', { count: significant.length }) },
     )
   }
   const face = significant[0]!

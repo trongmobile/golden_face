@@ -63,24 +63,28 @@ export const BROW_LANDMARKS = [...BROW_LANDMARKS_RIGHT, ...BROW_LANDMARKS_LEFT] 
 
 /** Left/right landmark pairs used for the geometric symmetry analysis. */
 export const SYMMETRY_PAIRS = [
-  { id: 'forehead', label: 'Forehead sides', right: 54, left: 284 },
-  { id: 'brow-outer', label: 'Outer brow ends', right: 46, left: 276 },
-  { id: 'brow-peak', label: 'Brow peaks', right: 105, left: 334 },
-  { id: 'eye-outer', label: 'Outer eye corners', right: 33, left: 263 },
-  { id: 'eye-inner', label: 'Inner eye corners', right: 133, left: 362 },
-  { id: 'cheekbone', label: 'Cheekbone / face edge', right: 234, left: 454 },
-  { id: 'nose-wing', label: 'Nostril wings', right: 129, left: 358 },
-  { id: 'mouth-corner', label: 'Mouth corners', right: 61, left: 291 },
-  { id: 'jaw', label: 'Jaw corners', right: 172, left: 397 },
+  { id: 'forehead', right: 54, left: 284 },
+  { id: 'brow-outer', right: 46, left: 276 },
+  { id: 'brow-peak', right: 105, left: 334 },
+  { id: 'eye-outer', right: 33, left: 263 },
+  { id: 'eye-inner', right: 133, left: 362 },
+  { id: 'cheekbone', right: 234, left: 454 },
+  { id: 'nose-wing', right: 129, left: 358 },
+  { id: 'mouth-corner', right: 61, left: 291 },
+  { id: 'jaw', right: 172, left: 397 },
 ] as const
+
+export type SymmetryPairId = (typeof SYMMETRY_PAIRS)[number]['id']
 
 /** Points on (or near) the facial midline, checked for offset from the symmetry axis. */
 export const MIDLINE_FEATURES = [
-  { id: 'glabella', label: 'Between the brows', index: 168 },
-  { id: 'nose-tip', label: 'Nose tip', index: 1 },
-  { id: 'upper-lip', label: 'Upper-lip centre', index: 0 },
-  { id: 'chin', label: 'Chin', index: 152 },
+  { id: 'glabella', index: 168 },
+  { id: 'nose-tip', index: 1 },
+  { id: 'upper-lip', index: 0 },
+  { id: 'chin', index: 152 },
 ] as const
+
+export type MidlineFeatureId = (typeof MIDLINE_FEATURES)[number]['id']
 
 /** Face-outline points, used to compute the face bounding box for quality checks. */
 export const FACE_OVAL_INDICES = [

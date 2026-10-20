@@ -1,3 +1,4 @@
+import { msg, type Msg } from '@/i18n'
 import type {
   FaceLevel,
   FaceMeasurements,
@@ -29,7 +30,7 @@ import {
   MIDLINE_FEATURES,
   SYMMETRY_PAIRS,
 } from './landmarks'
-import { METRIC_CATALOG, SEGMENT_LABELS, type SegmentId } from './metric-catalog'
+import { METRIC_CATALOG, type SegmentId } from './metric-catalog'
 
 export class InvalidLandmarksError extends Error {
   constructor(message: string) {
@@ -57,11 +58,11 @@ const MIN_BROW_POINTS = 10
 interface Level {
   b: number
   a: number
-  source: string
+  source: Msg
   landmarks: number[]
 }
 
-type SegmentOutcome = { ok: true; segment: MeasuredSegment } | { ok: false; reason: string }
+type SegmentOutcome = { ok: true; segment: MeasuredSegment } | { ok: false; reason: Msg }
 
 function isUsableNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value)
@@ -87,8 +88,10 @@ function validateInput(landmarks: unknown, size: ImageSize): asserts landmarks i
   }
 }
 
-const missing = (...indices: number[]) =>
-  `Landmark${indices.length > 1 ? 's' : ''} ${indices.join(' / ')} could not be located reliably.`
+const missing = (...indices: number[]): Msg =>
+  msg(indices.length > 1 ? 'metrics.reasons.missingMany' : 'metrics.reasons.missingOne', { landmarks: indices.join(' / ') })
+
+const landmarkSource = (index: number): Msg => msg('metrics.source.landmark', { index })
 
 /**
  * Computes every measurement for one face from its landmarks.
@@ -133,23 +136,23 @@ export function computeMeasurements(
   const axisOffset = midpoints.length > 0 ? median(midpoints) : 0
 
   // ── Levels (horizontal reference lines) ──
-  const levelFromLandmark = (index: number, source: string): Level | null => {
+  const levelFromLandmark = (index: number): Level | null => {
     const f = fp(index)
-    return f ? { a: f.a, b: f.b, source, landmarks: [index] } : null
+    return f ? { a: f.a, b: f.b, source: landmarkSource(index), landmarks: [index] } : null
   }
-  const meshTop = levelFromLandmark(LM.meshTop, 'Landmark 10')
-  const noseBase = levelFromLandmark(LM.noseBase, 'Landmark 2')
-  const chin = levelFromLandmark(LM.chin, 'Landmark 152')
+  const meshTop = levelFromLandmark(LM.meshTop)
+  const noseBase = levelFromLandmark(LM.noseBase)
+  const chin = levelFromLandmark(LM.chin)
   const brow = browLevel(fp)
 
   // ── Hairline: only ever supplied by the user, never estimated ──
   const hairlineState = resolveHairline(options.hairline, frame, size, brow?.b ?? null)
   const hairlineLevel: Level | null =
-    hairlineState.status === 'user' ? levelFromPoint(frame, hairlineState.point, 'Marked hairline') : null
+    hairlineState.status === 'user' ? levelFromPoint(frame, hairlineState.point, msg('metrics.source.markedHairline')) : null
 
   // ── Segments ──
   const segments: Partial<Record<SegmentId, MeasuredSegment>> = {}
-  const skippedSegments: Partial<Record<SegmentId, string>> = {}
+  const skippedSegments: Partial<Record<SegmentId, Msg>> = {}
   const record = (id: SegmentId, outcome: SegmentOutcome) => {
     if (outcome.ok) segments[id] = outcome.segment
     else skippedSegments[id] = outcome.reason
@@ -164,39 +167,32 @@ export function computeMeasurements(
       ok: true,
       segment: {
         id,
-        label: SEGMENT_LABELS[id],
         value: Math.abs(q.a - p.a),
         from: fromFrame(frame, p.a, bMid),
         to: fromFrame(frame, q.a, bMid),
-        source: `Landmarks ${right} ↔ ${left}`,
+        source: msg('metrics.source.landmarks', { right, left }),
         landmarks: [right, left],
       },
     }
   }
 
-  const vertical = (id: SegmentId, top: Level | null, bottom: Level | null, reason: string): SegmentOutcome => {
+  const vertical = (id: SegmentId, top: Level | null, bottom: Level | null, reason: Msg): SegmentOutcome => {
     if (!top || !bottom) return { ok: false, reason }
     return {
       ok: true,
       segment: {
         id,
-        label: SEGMENT_LABELS[id],
         value: Math.abs(bottom.b - top.b),
         from: fromFrame(frame, axisOffset, top.b),
         to: fromFrame(frame, axisOffset, bottom.b),
-        source: `${top.source} → ${bottom.source}`,
+        source: msg('metrics.source.range', { from: top.source, to: bottom.source }),
         landmarks: [...top.landmarks, ...bottom.landmarks],
       },
     }
   }
 
   const lipHeight = (id: SegmentId, topIndex: number, bottomIndex: number): SegmentOutcome =>
-    vertical(
-      id,
-      levelFromLandmark(topIndex, `Landmark ${topIndex}`),
-      levelFromLandmark(bottomIndex, `Landmark ${bottomIndex}`),
-      missing(topIndex, bottomIndex),
-    )
+    vertical(id, levelFromLandmark(topIndex), levelFromLandmark(bottomIndex), missing(topIndex, bottomIndex))
 
   // Face length starts at the user-marked hairline when there is one, otherwise at the mesh top.
   const faceTop = hairlineLevel ?? meshTop
@@ -214,7 +210,7 @@ export function computeMeasurements(
   if (irisRight && irisLeft) {
     record('interpupillary', width('interpupillary', LM.irisCentreRight, LM.irisCentreLeft))
   } else {
-    skippedSegments.interpupillary = 'Iris landmarks (468 / 473) are not available.'
+    skippedSegments.interpupillary = msg('metrics.reasons.irisUnavailable')
   }
 
   // Lips: only valid with the mouth closed.
@@ -230,8 +226,7 @@ export function computeMeasurements(
     mouthWidthValue > 0 &&
     lipGap / mouthWidthValue > LIP_OPENING_MAX_RATIO
   if (mouthOpen) {
-    const reason =
-      'The mouth is open, which changes lip height. A relaxed, closed mouth is needed to measure the lips.'
+    const reason = msg('metrics.reasons.mouthOpen')
     skippedSegments['upper-lip'] = reason
     skippedSegments['lower-lip'] = reason
   } else {
@@ -243,11 +238,11 @@ export function computeMeasurements(
   const upperReason =
     hairlineState.status === 'invalid'
       ? hairlineState.reason
-      : 'The hairline cannot be located reliably from facial landmarks (hair, hats and lighting hide it), so the upper third is not estimated. Mark your hairline on the photo to include it.'
+      : msg('metrics.reasons.hairlineNotEstimated')
   record('upper-third', vertical('upper-third', hairlineLevel, brow, upperReason))
   record(
     'middle-third',
-    vertical('middle-third', brow, noseBase, 'The eyebrow or nose-base landmarks could not be located reliably.'),
+    vertical('middle-third', brow, noseBase, msg('metrics.reasons.browOrNoseMissing')),
   )
   record('lower-third', vertical('lower-third', noseBase, chin, missing(LM.noseBase, LM.chin)))
 
@@ -259,7 +254,7 @@ export function computeMeasurements(
       const reason =
         skippedSegments[definition.numerator] ??
         skippedSegments[definition.denominator] ??
-        'A required measurement is not available.'
+        msg('metrics.reasons.requiredMissing')
       return { status: 'skipped', id: definition.id, reason }
     }
 
@@ -269,7 +264,7 @@ export function computeMeasurements(
       return {
         status: 'skipped',
         id: definition.id,
-        reason: 'One of the two measurements is zero or invalid, so no ratio can be computed.',
+        reason: msg('metrics.reasons.zeroOrInvalid'),
       }
     }
 
@@ -287,10 +282,10 @@ export function computeMeasurements(
 
   // ── Levels for drawing ──
   const levels: FaceLevel[] = []
-  if (hairlineLevel) levels.push({ id: 'hairline', label: 'Hairline (marked)', b: hairlineLevel.b })
-  if (brow) levels.push({ id: 'brow', label: 'Brow line', b: brow.b })
-  if (noseBase) levels.push({ id: 'nose-base', label: 'Nose base', b: noseBase.b })
-  if (chin) levels.push({ id: 'chin', label: 'Chin', b: chin.b })
+  if (hairlineLevel) levels.push({ id: 'hairline', b: hairlineLevel.b })
+  if (brow) levels.push({ id: 'brow', b: brow.b })
+  if (noseBase) levels.push({ id: 'nose-base', b: noseBase.b })
+  if (chin) levels.push({ id: 'chin', b: chin.b })
 
   return {
     frame,
@@ -318,7 +313,7 @@ function midpointOf(p: Point | null, q: Point | null): Point | null {
   return p && q ? { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 } : null
 }
 
-function levelFromPoint(frame: Frame, point: Point, source: string): Level {
+function levelFromPoint(frame: Frame, point: Point, source: Msg): Level {
   const f = toFrame(frame, point)
   return { a: f.a, b: f.b, source, landmarks: [] }
 }
@@ -332,7 +327,7 @@ function browLevel(fp: (index: number) => FramePoint | null): Level | null {
   return {
     a: mean(points.map((p) => p.a)),
     b: mean(points.map((p) => p.b)),
-    source: 'Brow line',
+    source: msg('metrics.source.browLine'),
     landmarks: [LM.browOuterRight, LM.browPeakRight, LM.browPeakLeft, LM.browOuterLeft],
   }
 }
@@ -345,14 +340,14 @@ function resolveHairline(
 ): HairlineState {
   if (!hairline) return { status: 'none' }
   if (!isUsableNumber(hairline.x) || !isUsableNumber(hairline.y)) {
-    return { status: 'invalid', reason: 'The marked hairline position is not valid.' }
+    return { status: 'invalid', reason: msg('metrics.reasons.hairlineInvalid') }
   }
   const inside = hairline.x >= 0 && hairline.y >= 0 && hairline.x <= size.width && hairline.y <= size.height
-  if (!inside) return { status: 'invalid', reason: 'The marked hairline lies outside the photo.' }
+  if (!inside) return { status: 'invalid', reason: msg('metrics.reasons.hairlineOutside') }
   // "Above" is measured along the face's own vertical axis, so a tilted head is handled correctly.
   const b = toFrame(frame, hairline).b
   if (browB === null || b >= browB) {
-    return { status: 'invalid', reason: 'The marked hairline must be above the eyebrows.' }
+    return { status: 'invalid', reason: msg('metrics.reasons.hairlineBelowBrows') }
   }
   return { status: 'user', point: hairline }
 }
@@ -389,20 +384,19 @@ function computeSymmetry({ frame, fp, pairFrames, axisOffset, faceWidth, topB, c
 
   for (const { pair, r, l } of pairFrames) {
     if (!r || !l) {
-      skippedPairs.push({ id: pair.id, label: pair.label, reason: missing(pair.right, pair.left) })
+      skippedPairs.push({ id: pair.id, reason: missing(pair.right, pair.left) })
       continue
     }
     const rightDistance = axisOffset - r.a
     const leftDistance = l.a - axisOffset
     const span = rightDistance + leftDistance
     if (!(span > 0)) {
-      skippedPairs.push({ id: pair.id, label: pair.label, reason: 'The left and right points overlap or are swapped.' })
+      skippedPairs.push({ id: pair.id, reason: msg('metrics.reasons.pairOverlap') })
       continue
     }
     const verticalReference = faceWidth && faceWidth > 0 ? faceWidth : span
     pairs.push({
       id: pair.id,
-      label: pair.label,
       rightLandmark: pair.right,
       leftLandmark: pair.left,
       right: fromFrame(frame, r.a, r.b),
@@ -419,7 +413,6 @@ function computeSymmetry({ frame, fp, pairFrames, axisOffset, faceWidth, topB, c
     return [
       {
         id: feature.id,
-        label: feature.label,
         point: fromFrame(frame, f.a, f.b),
         offsetPct: ((f.a - axisOffset) / faceWidth) * 100,
       },

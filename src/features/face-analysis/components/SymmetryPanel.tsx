@@ -1,15 +1,17 @@
 import { Alert } from '@/components/ui/Alert'
+import { useI18n } from '@/i18n'
 import { formatPercent, formatSignedPercent } from '@/utils/format'
 import type { QualityReport, SymmetryReport } from '@/types'
 import { QUALITY_THRESHOLDS } from '../quality'
 
 export function SymmetryPanel({ symmetry, quality }: { symmetry: SymmetryReport; quality: QualityReport }) {
+  const { t } = useI18n()
   const turned = quality.pose !== null && quality.pose.yaw > QUALITY_THRESHOLDS.yaw.warn
 
   if (symmetry.pairs.length === 0) {
     return (
-      <Alert tone="warning" title="Symmetry was not measured">
-        Too few left/right landmark pairs were available on this photo.
+      <Alert tone="warning" title={t('results.symmetry.notMeasuredTitle')}>
+        {t('results.symmetry.notMeasuredText')}
       </Alert>
     )
   }
@@ -18,9 +20,9 @@ export function SymmetryPanel({ symmetry, quality }: { symmetry: SymmetryReport;
     <div>
       <dl className="grid gap-3 sm:grid-cols-3">
         {[
-          { label: 'Average left–right difference', value: symmetry.meanHorizontalDeviationPct, hint: 'distance to the midline' },
-          { label: 'Largest left–right difference', value: symmetry.maxHorizontalDeviationPct, hint: 'single feature pair' },
-          { label: 'Average height difference', value: symmetry.meanVerticalOffsetPct, hint: '% of face width' },
+          { label: t('results.symmetry.averageSide'), value: symmetry.meanHorizontalDeviationPct, hint: t('results.symmetry.averageSideHint') },
+          { label: t('results.symmetry.largestSide'), value: symmetry.maxHorizontalDeviationPct, hint: t('results.symmetry.largestSideHint') },
+          { label: t('results.symmetry.averageHeight'), value: symmetry.meanVerticalOffsetPct, hint: t('results.symmetry.averageHeightHint') },
         ].map((item) => (
           <div key={item.label} className="rounded-2xl bg-accent-50 p-4">
             <dt className="text-xs text-muted">{item.label}</dt>
@@ -33,31 +35,30 @@ export function SymmetryPanel({ symmetry, quality }: { symmetry: SymmetryReport;
       </dl>
 
       {turned && (
-        <Alert tone="warning" className="mt-4" title="Head rotation inflates these numbers">
-          The head is turned slightly, which makes one side look larger than the other. Retake a straight-on photo
-          for a fairer reading.
+        <Alert tone="warning" className="mt-4" title={t('results.symmetry.turnedTitle')}>
+          {t('results.symmetry.turnedText')}
         </Alert>
       )}
 
       <div
         className="mt-5 overflow-x-auto"
         role="region"
-        aria-label="Symmetry table (scrolls sideways on small screens)"
+        aria-label={t('results.symmetry.tableLabel')}
         tabIndex={0}
       >
         <table className="w-full min-w-[28rem] text-left text-sm">
-          <caption className="sr-only">Left–right differences per pair of landmarks</caption>
+          <caption className="sr-only">{t('results.symmetry.caption')}</caption>
           <thead>
             <tr className="border-b border-line text-xs text-muted">
-              <th scope="col" className="py-2 pr-3 font-medium">Feature pair</th>
-              <th scope="col" className="py-2 pr-3 font-medium">Side difference</th>
-              <th scope="col" className="py-2 font-medium">Height difference</th>
+              <th scope="col" className="py-2 pr-3 font-medium">{t('results.symmetry.pair')}</th>
+              <th scope="col" className="py-2 pr-3 font-medium">{t('results.symmetry.side')}</th>
+              <th scope="col" className="py-2 font-medium">{t('results.symmetry.height')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
             {symmetry.pairs.map((pair) => (
               <tr key={pair.id}>
-                <th scope="row" className="py-2.5 pr-3 font-medium text-ink">{pair.label}</th>
+                <th scope="row" className="py-2.5 pr-3 font-medium text-ink">{t(`metrics.symmetryPairs.${pair.id}`)}</th>
                 <td className="py-2.5 pr-3 tabular-nums text-muted">
                   {formatSignedPercent(pair.horizontalDeviationPct)}
                 </td>
@@ -70,16 +71,15 @@ export function SymmetryPanel({ symmetry, quality }: { symmetry: SymmetryReport;
 
       {symmetry.skippedPairs.length > 0 && (
         <p className="mt-3 text-xs text-muted">
-          Not measured: {symmetry.skippedPairs.map((pair) => pair.label).join(', ')}.
+          {t('results.symmetry.skipped', {
+            features: symmetry.skippedPairs.map((pair) => t(`metrics.symmetryPairs.${pair.id}`)).join(', '),
+          })}
         </p>
       )}
 
       <p className="mt-4 text-sm leading-relaxed text-muted">
-        <span className="font-semibold text-ink">How to read this. </span>
-        A positive side difference means the subject’s left-hand point sits farther from the midline than its right-hand
-        partner; a positive height difference means the left point sits lower. On the photo, a ring marks where the right-side
-        point would land if the face were perfectly mirrored. Every face has some natural asymmetry — perfect
-        symmetry is neither expected nor “better”.
+        <span className="font-semibold text-ink">{t('results.symmetry.howTitle')} </span>
+        {t('results.symmetry.how')}
       </p>
     </div>
   )

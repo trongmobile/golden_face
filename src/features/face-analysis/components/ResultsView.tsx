@@ -3,6 +3,7 @@ import { Download, Printer, RefreshCw, Trash2 } from 'lucide-react'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { useI18n } from '@/i18n'
 import type { AnalysisResult, Point } from '@/types'
 import { computeMeasurements } from '../measurements'
 import { METRIC_CATALOG, type MetricId } from '../metric-catalog'
@@ -25,6 +26,7 @@ interface ResultsViewProps {
 }
 
 export function ResultsView({ image, result, onAnalyzeAnother, onClear }: ResultsViewProps) {
+  const { t, lang, rich } = useI18n()
   const [layers, setLayers] = useState<ReadonlySet<OverlayLayer>>(() => new Set(DEFAULT_LAYERS))
   const [hovered, setHovered] = useState<MetricId | null>(null)
   const [pinned, setPinned] = useState<MetricId | null>(null)
@@ -57,9 +59,9 @@ export function ResultsView({ image, result, onAnalyzeAnother, onClear }: Result
     setExportError(null)
     setExporting(true)
     try {
-      await downloadReportPng({ image, result, measurements, layers })
+      await downloadReportPng({ image, result, measurements, layers, t, locale: lang })
     } catch {
-      setExportError('The report image could not be created on this device. You can still use Print and save as PDF.')
+      setExportError(t('results.exportError'))
     } finally {
       setExporting(false)
     }
@@ -72,33 +74,32 @@ export function ResultsView({ image, result, onAnalyzeAnother, onClear }: Result
     <div className="container-page py-8 sm:py-12">
       {/* Only visible when printing */}
       <div className="print-only mb-6 border-b border-line pb-4">
-        <p className="font-display text-2xl">GoldenFace — Facial proportion report</p>
-        <p className="text-sm text-muted">{new Date(result.analyzedAt).toLocaleString()} · generated on this device</p>
+        <p className="font-display text-2xl">{t('results.print.title')}</p>
+        <p className="text-sm text-muted">
+          {t('results.print.meta', { date: new Date(result.analyzedAt).toLocaleString(lang) })}
+        </p>
       </div>
 
       <header className="flex flex-wrap items-end justify-between gap-5">
         <div className="max-w-2xl">
-          <p className="text-xs font-semibold tracking-[0.18em] text-accent-700 uppercase">Analysis complete</p>
+          <p className="text-xs font-semibold tracking-[0.18em] text-accent-700 uppercase">{t('results.header.eyebrow')}</p>
           <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-ink sm:text-5xl">
-            Your facial proportions
+            {t('results.header.title')}
           </h1>
-          <p className="mt-3 text-muted">
-            Measurements from {result.landmarks.length} facial landmarks, compared with the golden ratio where a
-            comparison makes geometric sense.
-          </p>
+          <p className="mt-3 text-muted">{t('results.header.intro', { count: result.landmarks.length })}</p>
         </div>
         <div className="no-print flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
           <Button className="w-full sm:w-auto" variant="secondary" onClick={onAnalyzeAnother} icon={<RefreshCw className="size-4" aria-hidden="true" />}>
-            Analyze another photo
+            {t('results.actions.another')}
           </Button>
           <Button className="w-full sm:w-auto" variant="primary" onClick={onDownload} loading={exporting} icon={<Download className="size-4" aria-hidden="true" />}>
-            Download PNG report
+            {t('results.actions.download')}
           </Button>
           <Button className="w-full sm:w-auto" variant="secondary" onClick={() => window.print()} icon={<Printer className="size-4" aria-hidden="true" />}>
-            Print / save as PDF
+            {t('results.actions.print')}
           </Button>
           <Button className="w-full sm:w-auto" variant="ghost" onClick={onClear} icon={<Trash2 className="size-4" aria-hidden="true" />}>
-            Clear photo &amp; results
+            {t('results.actions.clear')}
           </Button>
         </div>
       </header>
@@ -109,14 +110,13 @@ export function ResultsView({ image, result, onAnalyzeAnother, onClear }: Result
         </Alert>
       )}
 
-      <Alert tone="info" className="mt-6 print-avoid-break" title="A geometric exploration — not a beauty score">
-        The golden ratio is one reference point among many. These numbers describe shapes in this one photo; they say
-        nothing about attractiveness, health or character, and no overall score is given.
+      <Alert tone="info" className="mt-6 print-avoid-break" title={t('results.notice.title')}>
+        {t('results.notice.text')}
       </Alert>
 
       {measurements.hairline.status === 'invalid' && (
-        <Alert tone="warning" className="no-print mt-4" title="The marked hairline was not used">
-          {measurements.hairline.reason}
+        <Alert tone="warning" className="no-print mt-4" title={t('results.hairlineIgnored')}>
+          {t(measurements.hairline.reason)}
         </Alert>
       )}
 
@@ -139,11 +139,9 @@ export function ResultsView({ image, result, onAnalyzeAnother, onClear }: Result
         <div className="space-y-8 lg:col-span-5">
           <section aria-labelledby="proportions-title">
             <h2 id="proportions-title" className="font-display text-2xl font-medium text-ink">
-              Overall proportions
+              {t('results.sections.overall')}
             </h2>
-            <p className="no-print mt-1 text-sm text-muted">
-              Hover, focus or tap the eye icon on a card to see exactly what was measured.
-            </p>
+            <p className="no-print mt-1 text-sm text-muted">{t('results.sections.overallHint')}</p>
             <div className="mt-4 space-y-3">
               {overall.map((metric) => (
                 <MetricCard
@@ -160,15 +158,13 @@ export function ResultsView({ image, result, onAnalyzeAnother, onClear }: Result
 
           <section aria-labelledby="thirds-title">
             <h2 id="thirds-title" className="font-display text-2xl font-medium text-ink">
-              Vertical thirds
+              {t('results.sections.thirds')}
             </h2>
             <Card className="mt-4">
               <ThirdsBar thirds={measurements.thirds} />
               {!measurements.thirds.complete && measurements.hairline.status !== 'user' && (
                 <p className="mt-4 text-sm leading-relaxed text-muted">
-                  The upper third is missing because the hairline is hidden by hair and cannot be located reliably from
-                  landmarks. Use <span className="font-medium text-ink">Mark hairline</span> above the photo to add it
-                  yourself.
+                  {rich('results.sections.thirdsMissing', { b: (c) => <span className="font-medium text-ink">{c}</span> })}
                 </p>
               )}
             </Card>
@@ -191,12 +187,9 @@ export function ResultsView({ image, result, onAnalyzeAnother, onClear }: Result
       <div className="mt-12 grid gap-8 lg:grid-cols-2 print:grid-cols-1">
         <section aria-labelledby="chart-title" className="print-avoid-break">
           <h2 id="chart-title" className="font-display text-2xl font-medium text-ink">
-            Compared with the golden ratio
+            {t('results.sections.chart')}
           </h2>
-          <p className="mt-1 text-sm text-muted">
-            Only ratios with a recognised golden-ratio claim are charted. Most facial proportions are not expected to
-            equal {formatRatio(PHI)}.
-          </p>
+          <p className="mt-1 text-sm text-muted">{t('results.sections.chartHint', { phi: formatRatio(PHI) })}</p>
           <Card className="mt-4">
             <RatioChart metrics={measurements.metrics} />
           </Card>
@@ -204,7 +197,7 @@ export function ResultsView({ image, result, onAnalyzeAnother, onClear }: Result
 
         <section aria-labelledby="symmetry-title" className="print-avoid-break">
           <h2 id="symmetry-title" className="font-display text-2xl font-medium text-ink">
-            Geometric symmetry
+            {t('results.sections.symmetry')}
           </h2>
           <Card className="mt-4">
             <SymmetryPanel symmetry={measurements.symmetry} quality={result.quality} />
@@ -215,7 +208,7 @@ export function ResultsView({ image, result, onAnalyzeAnother, onClear }: Result
       <div className="mt-12 grid gap-8 lg:grid-cols-2 print:grid-cols-1">
         <section aria-labelledby="quality-title" className="print-avoid-break">
           <h2 id="quality-title" className="font-display text-2xl font-medium text-ink">
-            Photo quality &amp; reliability
+            {t('results.sections.quality')}
           </h2>
           <Card className="mt-4">
             <QualityPanel quality={result.quality} model={result.model} />
@@ -224,30 +217,24 @@ export function ResultsView({ image, result, onAnalyzeAnother, onClear }: Result
 
         <section aria-labelledby="notes-title" className="print-avoid-break">
           <h2 id="notes-title" className="font-display text-2xl font-medium text-ink">
-            Reading these numbers
+            {t('results.sections.notes')}
           </h2>
           <Card className="mt-4 space-y-4 text-sm leading-relaxed text-muted">
             <p>
-              <span className="font-semibold text-ink">The formula. </span>
-              For a pair of lengths A and B: r = max(A, B) ÷ min(A, B); deviation = |r − φ| ÷ φ; similarity = 100 ×
-              e<sup>−k × deviation</sup>, with φ = 1.6180339887 and k = {DEFAULT_SIMILARITY_K}. The constant k only sets
-              how fast the percentage falls off — it is not a medical threshold or a standard of beauty.
+              <span className="font-semibold text-ink">{t('results.notes.formulaTitle')} </span>
+              {rich('results.notes.formula', { sup: (c) => <sup>{c}</sup> }, { k: DEFAULT_SIMILARITY_K })}
             </p>
             <p>
-              <span className="font-semibold text-ink">Limits of a 2D photo. </span>
-              Camera distance and lens distortion, the angle of the head, expression, lighting and image resolution all
-              change measured widths and heights. A close-up selfie, for example, enlarges the nose and centre of the
-              face relative to the ears. Landmarks are estimates and can be off by a few pixels.
+              <span className="font-semibold text-ink">{t('results.notes.limitsTitle')} </span>
+              {t('results.notes.limits')}
             </p>
             <p>
-              <span className="font-semibold text-ink">About the hairline. </span>
-              The model finds no hairline, so face length is measured from the top of the landmark mesh (on the
-              forehead) unless you mark the hairline yourself.
+              <span className="font-semibold text-ink">{t('results.notes.hairlineTitle')} </span>
+              {t('results.notes.hairline')}
             </p>
             <p>
-              <span className="font-semibold text-ink">Please keep perspective. </span>
-              Research on perceived attractiveness does not support φ as a rule for faces. Use this as a way to look
-              at geometry, not to judge yourself or anyone else.
+              <span className="font-semibold text-ink">{t('results.notes.perspectiveTitle')} </span>
+              {t('results.notes.perspective')}
             </p>
           </Card>
         </section>

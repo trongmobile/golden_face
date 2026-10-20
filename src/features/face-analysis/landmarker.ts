@@ -1,4 +1,5 @@
 import type { FaceLandmarker } from '@mediapipe/tasks-vision'
+import { msg, type Msg } from '@/i18n'
 import type { FaceConnections } from '@/types'
 
 /**
@@ -34,9 +35,13 @@ export interface LandmarkerHandle {
 }
 
 export class ModelLoadError extends Error {
-  constructor(message: string, options?: { cause?: unknown }) {
-    super(message, options)
+  /** What to show the visitor, in their language (`t(error.msg)`). `message` is for developers. */
+  readonly msg: Msg
+
+  constructor(message: string, options?: { cause?: unknown; msg?: Msg }) {
+    super(message, options?.cause !== undefined ? { cause: options.cause } : undefined)
     this.name = 'ModelLoadError'
+    this.msg = options?.msg ?? msg('analysisErrors.detail.model-load-failed')
   }
 }
 
@@ -104,7 +109,7 @@ async function downloadModelWithFallback(): Promise<Uint8Array> {
   }
   throw new ModelLoadError(
     'The face-analysis model could not be downloaded. Check your internet connection and try again.',
-    { cause: lastError },
+    { cause: lastError, msg: msg('analysisErrors.model.download') },
   )
 }
 
@@ -133,7 +138,10 @@ async function createHandle(): Promise<LandmarkerHandle> {
     }
   }
   if (!vision) {
-    throw new ModelLoadError('The face-analysis engine could not be loaded.', { cause: visionError })
+    throw new ModelLoadError('The face-analysis engine could not be loaded.', {
+      cause: visionError,
+      msg: msg('analysisErrors.model.engineLoad'),
+    })
   }
 
   const baseOptions = { modelAssetBuffer: modelBuffer }
@@ -161,7 +169,10 @@ async function createHandle(): Promise<LandmarkerHandle> {
         ...common,
       })
     } catch (error) {
-      throw new ModelLoadError('The face-analysis engine could not start on this device.', { cause: error })
+      throw new ModelLoadError('The face-analysis engine could not start on this device.', {
+        cause: error,
+        msg: msg('analysisErrors.model.engineStart'),
+      })
     }
   }
 

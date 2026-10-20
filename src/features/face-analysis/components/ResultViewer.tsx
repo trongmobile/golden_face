@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowDown, ArrowUp, Crosshair, Maximize2, Minus, Plus, RotateCcw, ScanFace, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { useI18n } from '@/i18n'
 import type { AnalysisResult, FaceMeasurements, Point } from '@/types'
 import { cn } from '@/utils/cn'
 import { fromFrame, toFrame } from '../geometry'
@@ -34,6 +35,7 @@ export function ResultViewer({
   hairline,
   onHairlineChange,
 }: ResultViewerProps) {
+  const { t } = useI18n()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [zoom, setZoom] = useState(1)
   const [marking, setMarking] = useState(false)
@@ -53,8 +55,8 @@ export function ResultViewer({
     const context = canvas.getContext('2d')
     if (!context) return
     context.clearRect(0, 0, canvas.width, canvas.height)
-    paintAnnotated(context, image, result, measurements, { layers, highlight, labels: true }, region, scale)
-  }, [image, result, measurements, layers, highlight, region, scale])
+    paintAnnotated(context, image, result, measurements, { layers, highlight, labels: true, t }, region, scale)
+  }, [image, result, measurements, layers, highlight, region, scale, t])
 
   const faceLength = measurements.segments['face-length']?.value ?? height * 0.3
 
@@ -103,10 +105,10 @@ export function ResultViewer({
   return (
     <div>
       <div className="no-print mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div role="group" aria-label="Zoom" className="flex items-center gap-1 rounded-full border border-line bg-paper p-1">
+        <div role="group" aria-label={t('results.viewer.zoom')} className="flex items-center gap-1 rounded-full border border-line bg-paper p-1">
           <button
             type="button"
-            aria-label="Zoom out"
+            aria-label={t('results.viewer.zoomOut')}
             disabled={zoom <= MIN_ZOOM}
             onClick={() => setZoom((z) => clampZoom(z - ZOOM_STEP))}
             className="grid size-9 place-items-center rounded-full hover:bg-accent-100 disabled:opacity-40"
@@ -118,7 +120,7 @@ export function ResultViewer({
           </span>
           <button
             type="button"
-            aria-label="Zoom in"
+            aria-label={t('results.viewer.zoomIn')}
             disabled={zoom >= MAX_ZOOM}
             onClick={() => setZoom((z) => clampZoom(z + ZOOM_STEP))}
             className="grid size-9 place-items-center rounded-full hover:bg-accent-100 disabled:opacity-40"
@@ -127,7 +129,7 @@ export function ResultViewer({
           </button>
           <button
             type="button"
-            aria-label="Reset zoom"
+            aria-label={t('results.viewer.resetZoom')}
             disabled={zoom === 1}
             onClick={() => setZoom(1)}
             className="grid size-9 place-items-center rounded-full hover:bg-accent-100 disabled:opacity-40"
@@ -144,17 +146,17 @@ export function ResultViewer({
             onClick={() => setFocusFace((value) => !value)}
             icon={focusFace ? <Maximize2 className="size-4" aria-hidden="true" /> : <ScanFace className="size-4" aria-hidden="true" />}
           >
-            {focusFace ? 'Show full photo' : 'Focus on face'}
+            {focusFace ? t('results.viewer.showFull') : t('results.viewer.focusFace')}
           </Button>
         )}
 
         {hairline ? (
           <div className="flex items-center gap-1.5">
-            <Button size="sm" variant="secondary" onClick={() => nudge(-1)} icon={<ArrowUp className="size-4" aria-hidden="true" />} aria-label="Move hairline up">
-              Up
+            <Button size="sm" variant="secondary" onClick={() => nudge(-1)} icon={<ArrowUp className="size-4" aria-hidden="true" />} aria-label={t('results.viewer.moveUp')}>
+              {t('results.viewer.up')}
             </Button>
-            <Button size="sm" variant="secondary" onClick={() => nudge(1)} icon={<ArrowDown className="size-4" aria-hidden="true" />} aria-label="Move hairline down">
-              Down
+            <Button size="sm" variant="secondary" onClick={() => nudge(1)} icon={<ArrowDown className="size-4" aria-hidden="true" />} aria-label={t('results.viewer.moveDown')}>
+              {t('results.viewer.down')}
             </Button>
             <Button
               size="sm"
@@ -165,20 +167,19 @@ export function ResultViewer({
               }}
               icon={<X className="size-4" aria-hidden="true" />}
             >
-              Remove hairline
+              {t('results.viewer.removeHairline')}
             </Button>
           </div>
         ) : (
           <Button size="sm" variant="secondary" onClick={startMarking} icon={<Crosshair className="size-4" aria-hidden="true" />}>
-            Mark hairline
+            {t('results.viewer.markHairline')}
           </Button>
         )}
       </div>
 
       {marking && (
         <p role="status" className="no-print mb-3 rounded-xl bg-accent-50 px-4 py-2.5 text-sm text-ink">
-          Click the photo where your hairline is, or use the Up / Down buttons. The hairline is only used for the
-          upper third and for face length — it is never guessed.
+          {t('results.viewer.marking')}
         </p>
       )}
 
@@ -187,12 +188,12 @@ export function ResultViewer({
         style={{ maxHeight: zoom > 1 ? '72dvh' : undefined }}
         tabIndex={zoom > 1 ? 0 : undefined}
         role={zoom > 1 ? 'region' : undefined}
-        aria-label={zoom > 1 ? 'Zoomed photo — scroll to pan' : undefined}
+        aria-label={zoom > 1 ? t('results.viewer.zoomedRegion') : undefined}
       >
         <canvas
           ref={canvasRef}
           role="img"
-          aria-label="Your photo with facial landmarks and measurement lines drawn on it"
+          aria-label={t('results.viewer.canvasLabel')}
           onClick={onCanvasClick}
           className={cn('block h-auto max-w-none print:mx-auto print:max-h-[105mm] print:w-auto! print:max-w-full', marking && 'cursor-crosshair')}
           style={{ width: `${zoom * 100}%` }}
@@ -200,7 +201,7 @@ export function ResultViewer({
       </div>
 
       <fieldset className="no-print mt-4">
-        <legend className="mb-2 text-xs font-semibold tracking-[0.14em] text-muted uppercase">Overlay layers</legend>
+        <legend className="mb-2 text-xs font-semibold tracking-[0.14em] text-muted uppercase">{t('results.viewer.layers')}</legend>
         <div className="flex flex-wrap gap-2">
           {OVERLAY_LAYERS.map((layer) => {
             const active = layers.has(layer.id)
@@ -209,7 +210,7 @@ export function ResultViewer({
                 key={layer.id}
                 type="button"
                 aria-pressed={active}
-                title={layer.description}
+                title={t(layer.description)}
                 onClick={() => onToggleLayer(layer.id)}
                 className={cn(
                   'rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
@@ -218,7 +219,7 @@ export function ResultViewer({
                     : 'border-line-strong bg-paper text-ink hover:border-ink',
                 )}
               >
-                {layer.label}
+                {t(layer.label)}
               </button>
             )
           })}

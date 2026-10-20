@@ -16,6 +16,7 @@ import { applyEdits, decodeImageFile, releaseCanvas, type Photo } from '@/featur
 import { NO_EDITS, type PhotoEdits } from '@/features/image-upload/crop-utils'
 import { PhotoEditor } from '@/features/image-upload/PhotoEditor'
 import { UploadDropzone } from '@/features/image-upload/UploadDropzone'
+import { msg, useI18n, type Msg, type MsgKey } from '@/i18n'
 import type { AnalysisResult } from '@/types'
 import { usePageMeta } from '@/utils/usePageMeta'
 
@@ -36,14 +37,14 @@ interface State {
   error: AnalysisError | null
   stage: AnalysisStage
   modelProgress: ModelLoadProgress | null
-  fileError: string | null
+  fileError: Msg | null
   decoding: boolean
-  notice: string | null
+  notice: Msg | null
 }
 
 type Action =
   | { type: 'decode-start' }
-  | { type: 'decode-fail'; message: string }
+  | { type: 'decode-fail'; message: Msg }
   | { type: 'photo-loaded'; photo: Photo }
   | { type: 'set-edits'; edits: PhotoEdits }
   | { type: 'analyze-start'; image: HTMLCanvasElement }
@@ -52,7 +53,7 @@ type Action =
   | { type: 'success'; result: AnalysisResult }
   | { type: 'failure'; error: AnalysisError }
   | { type: 'back-to-edit' }
-  | { type: 'reset'; notice?: string }
+  | { type: 'reset'; notice?: Msg }
 
 const initialState: State = {
   phase: 'select',
@@ -103,18 +104,16 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-const TIPS = [
-  { icon: UserRound, text: 'Face the camera straight on, chin level, with your whole face in view.' },
-  { icon: Sun, text: 'Use soft, even light — a window works well. Avoid strong shadows, flash and backlight.' },
-  { icon: ScanFace, text: 'Keep a relaxed, neutral expression with your mouth closed.' },
-  { icon: CheckCircle2, text: 'Move hair off the forehead and face, and remove glasses, masks and hats if you can.' },
-] as const
+const TIPS: readonly { icon: typeof UserRound; text: MsgKey }[] = [
+  { icon: UserRound, text: 'analysisPage.tips.face' },
+  { icon: Sun, text: 'analysisPage.tips.light' },
+  { icon: ScanFace, text: 'analysisPage.tips.expression' },
+  { icon: CheckCircle2, text: 'analysisPage.tips.hair' },
+]
 
 export function AnalysisPage() {
-  usePageMeta(
-    'Analyze a Photo — GoldenFace',
-    'Upload or capture a front-facing photo and measure facial proportions entirely on your device. Nothing is uploaded.',
-  )
+  const { t } = useI18n()
+  usePageMeta(t('analysisPage.meta.title'), t('analysisPage.meta.description'))
 
   const [state, dispatch] = useReducer(reducer, initialState)
   const [searchParams] = useSearchParams()
@@ -160,7 +159,7 @@ export function AnalysisPage() {
     window.scrollTo({ top: 0 })
   }, [state.phase])
 
-  const discardAll = useCallback((notice?: string) => {
+  const discardAll = useCallback((notice?: Msg) => {
     controllerRef.current?.abort()
     const current = stateRef.current
     releaseCanvas(current.photo?.canvas)
@@ -178,7 +177,7 @@ export function AnalysisPage() {
     } catch (error) {
       dispatch({
         type: 'decode-fail',
-        message: error instanceof ImageFileError ? error.message : 'This photo could not be opened. Please try another one.',
+        message: error instanceof ImageFileError ? error.msg : msg('analysisPage.decodeFailed'),
       })
     }
   }, [])
@@ -204,7 +203,9 @@ export function AnalysisPage() {
     } catch {
       dispatch({
         type: 'failure',
-        error: new AnalysisError('resource-error', 'The photo could not be prepared on this device.'),
+        error: new AnalysisError('resource-error', 'The photo could not be prepared on this device.', {
+          msg: msg('analysisErrors.preparePhoto'),
+        }),
       })
       return
     }
@@ -227,7 +228,10 @@ export function AnalysisPage() {
       const failure =
         error instanceof AnalysisError
           ? error
-          : new AnalysisError('detection-failed', 'The photo could not be analyzed. Please try again.', { cause: error })
+          : new AnalysisError('detection-failed', 'The photo could not be analyzed. Please try again.', {
+              cause: error,
+              msg: msg('analysisErrors.analyzePhoto'),
+            })
       if (failure.code === 'aborted') return
       dispatch({ type: 'failure', error: failure })
     }
@@ -255,14 +259,18 @@ export function AnalysisPage() {
 
   const liveMessage =
     state.phase === 'analyzing'
-      ? 'Analyzing your photo on this device.'
+      ? t('analysisPage.live.analyzing')
       : state.phase === 'results'
-        ? 'Analysis complete. Your results are ready.'
+        ? t('analysisPage.live.complete')
         : state.phase === 'error'
-          ? (state.error?.message ?? 'The analysis could not be completed.')
+          ? state.error
+            ? t(state.error.msg)
+            : t('analysisPage.live.errorFallback')
           : state.phase === 'edit'
-            ? 'Photo loaded. Check it, then choose Analyze this photo.'
-            : (state.notice ?? '')
+            ? t('analysisPage.live.edit')
+            : state.notice
+              ? t(state.notice)
+              : ''
 
   let content: React.ReactNode
 
@@ -279,7 +287,7 @@ export function AnalysisPage() {
     content = (
       <Suspense
         fallback={
-          <div className="container-page py-12" role="status" aria-label="Preparing your results">
+          <div className="container-page py-12" role="status" aria-label={t('analysisPage.loadingResults')}>
             <Skeleton className="h-12 w-2/3 max-w-lg" />
             <Skeleton className="mt-8 h-96 w-full" />
           </div>
@@ -289,7 +297,7 @@ export function AnalysisPage() {
           image={state.analysisImage}
           result={state.result}
           onAnalyzeAnother={() => discardAll()}
-          onClear={() => discardAll('Your photo and analysis were removed from this page.')}
+          onClear={() => discardAll(msg('analysisPage.cleared'))}
         />
       </Suspense>
     )
@@ -306,13 +314,11 @@ export function AnalysisPage() {
     const { photo } = state
     content = (
       <div className="container-page py-10 sm:py-14">
-        <p className="text-xs font-semibold tracking-[0.18em] text-accent-700 uppercase">Step 2 of 3</p>
+        <p className="text-xs font-semibold tracking-[0.18em] text-accent-700 uppercase">{t('analysisPage.edit.step')}</p>
         <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-ink outline-none sm:text-5xl">
-          Check your photo
+          {t('analysisPage.edit.title')}
         </h1>
-        <p className="mt-3 max-w-2xl text-muted">
-          Rotate or crop so one face fills a good part of the picture. Nothing leaves your device.
-        </p>
+        <p className="mt-3 max-w-2xl text-muted">{t('analysisPage.edit.intro')}</p>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_20rem]">
           <Card>
@@ -321,32 +327,32 @@ export function AnalysisPage() {
           <div className="space-y-4">
             <Card>
               <h2 className="font-display text-xl font-medium text-ink">
-                {photo.origin === 'camera' ? 'Camera photo' : (photo.name ?? 'Your photo')}
+                {photo.origin === 'camera' ? t('analysisPage.edit.cameraPhoto') : (photo.name ?? t('analysisPage.edit.yourPhoto'))}
               </h2>
               <p className="mt-1 text-sm text-muted tabular-nums">
                 {photo.canvas.width} × {photo.canvas.height} px
               </p>
               <Button size="lg" className="mt-5 w-full" onClick={() => void analyze()} icon={<ScanFace className="size-5" aria-hidden="true" />}>
-                Analyze this photo
+                {t('analysisPage.edit.analyze')}
               </Button>
               <Button
                 variant="secondary"
                 className="mt-2 w-full"
                 onClick={() => discardAll()}
               >
-                Choose a different photo
+                {t('analysisPage.edit.chooseDifferent')}
               </Button>
               <Button variant="ghost" className="mt-1 w-full" onClick={openCamera} icon={<Camera className="size-4" aria-hidden="true" />}>
-                Take a new photo
+                {t('analysisPage.edit.takeNew')}
               </Button>
             </Card>
             <Card className="bg-accent-50">
-              <h2 className="text-sm font-semibold text-ink">Quick check</h2>
+              <h2 className="text-sm font-semibold text-ink">{t('analysisPage.edit.quickCheck')}</h2>
               <ul className="mt-3 space-y-2.5">
                 {TIPS.map((tip) => (
                   <li key={tip.text} className="flex gap-2.5 text-sm leading-relaxed text-muted">
                     <tip.icon className="mt-0.5 size-4 shrink-0 text-accent-700" aria-hidden="true" />
-                    {tip.text}
+                    {t(tip.text)}
                   </li>
                 ))}
               </ul>
@@ -359,18 +365,18 @@ export function AnalysisPage() {
     const cameraProblem = checkCameraSupport()
     content = (
       <div className="container-page py-10 sm:py-14">
-        <p className="text-xs font-semibold tracking-[0.18em] text-accent-700 uppercase">Analysis</p>
+        <p className="text-xs font-semibold tracking-[0.18em] text-accent-700 uppercase">{t('analysisPage.select.eyebrow')}</p>
         <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-ink sm:text-5xl">
-          Analyze a photo
+          {t('analysisPage.select.title')}
         </h1>
         <p className="mt-3 flex max-w-2xl items-start gap-2 text-muted">
           <Lock className="mt-1 size-4 shrink-0 text-accent-700" aria-hidden="true" />
-          Choose a front-facing portrait. It is analyzed in your browser and never uploaded.
+          {t('analysisPage.select.intro')}
         </p>
 
         {state.notice && (
-          <Alert tone="success" className="mt-6" title="Done">
-            {state.notice}
+          <Alert tone="success" className="mt-6" title={t('analysisPage.select.noticeTitle')}>
+            {t(state.notice)}
           </Alert>
         )}
 
@@ -386,28 +392,26 @@ export function AnalysisPage() {
               <span className="grid size-11 place-items-center rounded-full bg-accent-100 text-accent-700">
                 <Camera className="size-5" aria-hidden="true" />
               </span>
-              <h2 className="mt-4 font-display text-2xl font-medium text-ink">Take a photo</h2>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted">
-                Use your front or rear camera. The camera only runs while the dialog is open.
-              </p>
+              <h2 className="mt-4 font-display text-2xl font-medium text-ink">{t('analysisPage.select.cameraTitle')}</h2>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">{t('analysisPage.select.cameraText')}</p>
               {cameraProblem ? (
-                <Alert tone="warning" className="mt-4" title={cameraProblem.title}>
-                  {cameraProblem.message}
+                <Alert tone="warning" className="mt-4" title={t(cameraProblem.title)}>
+                  {t(cameraProblem.message)}
                 </Alert>
               ) : (
                 <Button className="mt-5" variant="secondary" onClick={openCamera} icon={<Camera className="size-4" aria-hidden="true" />}>
-                  Open camera
+                  {t('analysisPage.select.openCamera')}
                 </Button>
               )}
             </Card>
 
             <Card className="bg-accent-50">
-              <h2 className="text-sm font-semibold text-ink">For the steadiest measurements</h2>
+              <h2 className="text-sm font-semibold text-ink">{t('analysisPage.select.tipsTitle')}</h2>
               <ul className="mt-3 space-y-2.5">
                 {TIPS.map((tip) => (
                   <li key={tip.text} className="flex gap-2.5 text-sm leading-relaxed text-muted">
                     <tip.icon className="mt-0.5 size-4 shrink-0 text-accent-700" aria-hidden="true" />
-                    {tip.text}
+                    {t(tip.text)}
                   </li>
                 ))}
               </ul>

@@ -10,9 +10,10 @@ import { HomePage } from '@/pages/Home'
 import { NotFoundPage } from '@/pages/NotFound'
 import { PrivacyPage } from '@/pages/Privacy'
 import { METRIC_CATALOG } from '@/features/face-analysis/metric-catalog'
+import { I18nProvider, translate } from '@/i18n'
 
-function renderApp(path: string) {
-  return render(
+function renderApp(path: string, lang?: 'en' | 'vi') {
+  const app = (
     <MemoryRouter initialEntries={[path]}>
       <Suspense fallback={null}>
         <Routes>
@@ -24,8 +25,9 @@ function renderApp(path: string) {
           </Route>
         </Routes>
       </Suspense>
-    </MemoryRouter>,
+    </MemoryRouter>
   )
+  return render(lang ? <I18nProvider initialLang={lang}>{app}</I18nProvider> : app)
 }
 
 describe('home page', () => {
@@ -107,7 +109,7 @@ describe('layout and navigation', () => {
   it('footer carries the privacy statement and links to the privacy policy and terms', () => {
     renderApp('/')
     const footer = screen.getByRole('contentinfo')
-    expect(within(footer).getByText(/never uploaded/i)).toBeInTheDocument()
+    expect(within(footer).getByText(/never stored/i)).toBeInTheDocument()
     expect(within(footer).getByRole('link', { name: 'Privacy policy' })).toHaveAttribute('href', '/privacy')
     expect(within(footer).getByRole('link', { name: 'Terms of use' })).toHaveAttribute('href', '/privacy#terms')
   })
@@ -136,7 +138,8 @@ describe('about page', () => {
     expect(screen.getByText(/not a medical threshold or a standard\s+of beauty/i)).toBeInTheDocument()
     const table = screen.getByRole('table')
     for (const metric of METRIC_CATALOG) {
-      expect(within(table).getByRole('rowheader', { name: new RegExp(metric.label.replace(/[÷.]/g, '.')) })).toBeInTheDocument()
+      const label = translate('en', `metrics.items.${metric.id}.label`)
+      expect(within(table).getByRole('rowheader', { name: new RegExp(label.replace(/[÷.]/g, '.')) })).toBeInTheDocument()
     }
     // Exactly the eligible ones are marked "Yes".
     const yes = within(table).getAllByText('Yes')
@@ -178,5 +181,56 @@ describe('privacy page', () => {
     expect(within(terms).getByRole('heading', { name: 'Terms of use' })).toBeInTheDocument()
     expect(terms.textContent).toMatch(/agreed/)
     expect(terms.textContent).toMatch(/not medical/i)
+  })
+})
+
+describe('Vietnamese pages', () => {
+  it('translates the home page, its call-to-action links and the illustration text', () => {
+    renderApp('/', 'vi')
+    expect(screen.getByRole('heading', { level: 1, name: 'Khám phá hình học trên khuôn mặt bạn' })).toBeInTheDocument()
+    const upload = screen.getAllByRole('link', { name: 'Tải ảnh lên' })[0]!
+    const camera = screen.getAllByRole('link', { name: 'Chụp ảnh' })[0]!
+    expect(upload).toHaveAttribute('href', '/analysis?source=upload')
+    expect(camera).toHaveAttribute('href', '/analysis?source=camera')
+    expect(screen.getByRole('heading', { name: /ba bước/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Công cụ này không thể cho bạn biết điều gì' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /Hình minh họa đường viền khuôn mặt/ })).toBeInTheDocument()
+    expect(document.title).toBe('GoldenFace — Phân tích tỷ lệ khuôn mặt')
+    expect(document.documentElement.lang).toBe('vi')
+    // The headline claim must survive translation: no beauty score.
+    expect(screen.queryByText(/Discover the Geometry/)).not.toBeInTheDocument()
+  })
+
+  it('translates the about page, including the formulas and the measurements table', () => {
+    renderApp('/about', 'vi')
+    expect(screen.getByRole('heading', { level: 1, name: /Một con số nổi tiếng/ })).toBeInTheDocument()
+    expect(screen.getByText(/r = max\(A, B\) ÷ min\(A, B\), nên r không bao giờ nhỏ hơn 1/)).toBeInTheDocument()
+    expect(screen.getByText(/A = 1.45, B = 1 cho r = 1.45/)).toBeInTheDocument()
+    const table = screen.getByRole('table')
+    expect(within(table).getAllByText('Có')).toHaveLength(METRIC_CATALOG.filter((m) => m.goldenEligible).length)
+    expect(screen.getByRole('heading', { name: 'Giới hạn của phương pháp' })).toBeInTheDocument()
+    expect(screen.getByText('Đường chân tóc không được phát hiện')).toBeInTheDocument()
+    expect(document.title).toBe('Về tỷ lệ vàng — GoldenFace')
+  })
+
+  it('translates the privacy policy and terms while keeping the section anchor', () => {
+    renderApp('/privacy', 'vi')
+    expect(screen.getByRole('heading', { level: 1, name: /ở lại trên thiết bị/ })).toBeInTheDocument()
+    expect(screen.getByText(/Cập nhật lần cuối ngày 20 tháng 10 năm 2026/)).toBeInTheDocument()
+    const terms = document.getElementById('terms')!
+    expect(within(terms).getByRole('heading', { name: 'Điều khoản sử dụng' })).toBeInTheDocument()
+    expect(terms.textContent).toMatch(/đã đồng ý/)
+    expect(document.body.textContent).toMatch(/không localStorage/)
+    // Every section is labelled by its own heading, whatever the language.
+    for (const region of screen.getAllByRole('region')) {
+      expect(region).toHaveAccessibleName()
+    }
+  })
+
+  it('translates the 404 page', () => {
+    renderApp('/nope', 'vi')
+    expect(screen.getByRole('heading', { level: 1, name: 'Trang này không tồn tại' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Về trang chủ' })).toHaveAttribute('href', '/')
+    expect(document.title).toBe('Không tìm thấy trang — GoldenFace')
   })
 })

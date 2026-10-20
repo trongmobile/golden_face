@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { msg, translate } from '@/i18n'
 import { poseFromLandmarks, poseFromTransformMatrix } from '@/features/face-analysis/pose'
 import {
   QUALITY_THRESHOLDS,
@@ -198,7 +199,7 @@ describe('evaluateQuality', () => {
   it('warns about expressions that change the measurements', () => {
     const smiling = evaluateQuality({ ...base, expression: { smile: 0.9, jawOpen: 0.05, blink: 0 } })
     expect(status(smiling, 'expression')).toBe('warn')
-    expect(smiling.checks.find((c) => c.id === 'expression')!.detail).toMatch(/smiling/)
+    expect(translate('en', smiling.checks.find((c) => c.id === 'expression')!.detail)).toMatch(/smiling/)
     expect(status(evaluateQuality({ ...base, expression: { smile: 0, jawOpen: 0.5, blink: 0 } }), 'expression')).toBe('warn')
     expect(status(evaluateQuality({ ...base, expression: { smile: 0, jawOpen: 0, blink: 0.9 } }), 'expression')).toBe('warn')
   })
@@ -209,8 +210,8 @@ describe('evaluateQuality', () => {
 
   it('summarises reliability from the number of warnings and failures', () => {
     expect(summarizeReliability([])).toBe('good')
-    const warn = { id: 'a', label: 'a', status: 'warn', detail: '' } as const
-    const fail = { id: 'b', label: 'b', status: 'fail', detail: '' } as const
+    const warn = { id: 'a', label: msg('quality.checks.contrast.label'), status: 'warn', detail: msg('quality.checks.contrast.warn') } as const
+    const fail = { id: 'b', label: msg('quality.checks.frame.label'), status: 'fail', detail: msg('quality.checks.frame.fail') } as const
     expect(summarizeReliability([warn])).toBe('fair')
     expect(summarizeReliability([warn, warn])).toBe('fair')
     expect(summarizeReliability([warn, warn, warn])).toBe('limited')

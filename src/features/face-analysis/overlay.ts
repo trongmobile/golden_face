@@ -1,3 +1,4 @@
+import { englishT, type MsgKey, type Translate } from '@/i18n'
 import type { AnalysisResult, FaceMeasurements, MeasuredSegment, Point } from '@/types'
 import { fromFrame } from './geometry'
 import { computeFaceBox } from './quality'
@@ -6,13 +7,13 @@ import { METRIC_BY_ID, type MetricId, type SegmentId } from './metric-catalog'
 
 export type OverlayLayer = 'mesh' | 'contours' | 'measurements' | 'levels' | 'symmetry' | 'landmarks'
 
-export const OVERLAY_LAYERS: readonly { id: OverlayLayer; label: string; description: string }[] = [
-  { id: 'measurements', label: 'Measurements', description: 'Lines for every measured width and height.' },
-  { id: 'levels', label: 'Vertical thirds', description: 'Horizontal guides at the brows, nose base and chin.' },
-  { id: 'symmetry', label: 'Symmetry axis', description: 'The facial midline and left–right differences.' },
-  { id: 'contours', label: 'Face contours', description: 'Outline of the face, eyes, brows and lips.' },
-  { id: 'landmarks', label: 'Key landmarks', description: 'The landmark points the measurements use.' },
-  { id: 'mesh', label: 'Full mesh', description: 'All 468 face-mesh connections.' },
+export const OVERLAY_LAYERS: readonly { id: OverlayLayer; label: MsgKey; description: MsgKey }[] = [
+  { id: 'measurements', label: 'results.layers.measurements.label', description: 'results.layers.measurements.description' },
+  { id: 'levels', label: 'results.layers.levels.label', description: 'results.layers.levels.description' },
+  { id: 'symmetry', label: 'results.layers.symmetry.label', description: 'results.layers.symmetry.description' },
+  { id: 'contours', label: 'results.layers.contours.label', description: 'results.layers.contours.description' },
+  { id: 'landmarks', label: 'results.layers.landmarks.label', description: 'results.layers.landmarks.description' },
+  { id: 'mesh', label: 'results.layers.mesh.label', description: 'results.layers.mesh.description' },
 ]
 
 export const DEFAULT_LAYERS: readonly OverlayLayer[] = ['measurements', 'levels', 'contours']
@@ -25,6 +26,8 @@ export interface OverlayOptions {
   labels?: boolean
   /** Longest side (in image pixels) that line widths and labels are scaled against. Defaults to the image. */
   referenceSize?: number
+  /** Translates the text drawn on the photo. Defaults to English. */
+  t?: Translate
 }
 
 /** A rectangle of the analysed image, in image pixels. */
@@ -228,7 +231,7 @@ export function drawOverlay(
 ): void {
   const { width, height } = result.imageSize
   const unit = (options.referenceSize ?? Math.max(width, height)) / 1000
-  const { layers, highlight = null, labels = true } = options
+  const { layers, highlight = null, labels = true, t = englishT } = options
   const points = landmarkPixels(result)
   const base = Math.max(1.2, 1.6 * unit)
 
@@ -267,7 +270,7 @@ export function drawOverlay(
         },
         [8 * unit, 6 * unit],
       )
-      if (labels) label(ctx, level.label, right, unit, 'left')
+      if (labels) label(ctx, t(`metrics.levels.${level.id}`), right, unit, 'left')
     }
   }
 
@@ -316,7 +319,7 @@ export function drawOverlay(
         const segment = measurements.segments[id]
         if (!segment) continue
         const middle = { x: (segment.from.x + segment.to.x) / 2, y: (segment.from.y + segment.to.y) / 2 }
-        label(ctx, segment.label, middle, unit)
+        label(ctx, t(`metrics.segments.${segment.id}`), middle, unit)
       }
     }
   }

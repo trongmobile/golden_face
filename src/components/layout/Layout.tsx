@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { useI18n } from '@/i18n'
 import { Footer } from './Footer'
 import { Header } from './Header'
 
@@ -29,8 +30,9 @@ function useRouteEffects(mainRef: React.RefObject<HTMLElement | null>) {
 }
 
 function PageFallback() {
+  const { t } = useI18n()
   return (
-    <div className="container-page py-16" role="status" aria-label="Loading page">
+    <div className="container-page py-16" role="status" aria-label={t('layout.loadingPage')}>
       <Skeleton className="h-10 w-2/3 max-w-md" />
       <Skeleton className="mt-6 h-64 w-full" />
     </div>
@@ -38,6 +40,7 @@ function PageFallback() {
 }
 
 export function Layout() {
+  const { t } = useI18n()
   const mainRef = useRef<HTMLElement>(null)
   useRouteEffects(mainRef)
 
@@ -47,7 +50,7 @@ export function Layout() {
         href="#main"
         className="no-print sr-only z-50 rounded-full bg-navy px-5 py-3 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
       >
-        Skip to main content
+        {t('layout.skipToMain')}
       </a>
       <Header />
       <main id="main" ref={mainRef} tabIndex={-1} className="flex-1 outline-none">

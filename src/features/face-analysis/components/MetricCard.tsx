@@ -1,4 +1,5 @@
 import { Eye, EyeOff } from 'lucide-react'
+import { useI18n, type MsgKey } from '@/i18n'
 import { cn } from '@/utils/cn'
 import { formatPercent, formatRatio } from '@/utils/format'
 import type { MetricResult } from '@/types'
@@ -17,20 +18,27 @@ interface MetricCardProps {
 }
 
 export function MetricCard({ metric, active, pinned, onHover, onTogglePin }: MetricCardProps) {
+  const { t, lang } = useI18n()
   const definition = METRIC_BY_ID[metric.id]
+  const label = t(`metrics.items.${metric.id}.label`)
 
   if (metric.status === 'skipped') {
     return (
       <article
         className="print-avoid-break rounded-2xl border border-dashed border-line-strong bg-mist p-4"
-        aria-label={`${definition.label}: not measured`}
+        aria-label={t('results.metric.notMeasuredLabel', { label })}
       >
-        <h4 className="text-sm font-semibold text-ink">{definition.label}</h4>
-        <p className="mt-1 text-xs font-semibold tracking-wide text-accent-700 uppercase">Not measured</p>
-        <p className="mt-1.5 text-sm leading-relaxed text-muted">{metric.reason}</p>
+        <h4 className="text-sm font-semibold text-ink">{label}</h4>
+        <p className="mt-1 text-xs font-semibold tracking-wide text-accent-700 uppercase">
+          {t('results.metric.notMeasured')}
+        </p>
+        <p className="mt-1.5 text-sm leading-relaxed text-muted">{t(metric.reason)}</p>
       </article>
     )
   }
+
+  const goldenNote = t(`metrics.items.${metric.id}.goldenNote`)
+  const segmentName = (id: typeof metric.numerator.id) => t(`metrics.segments.${id}`)
 
   const { golden } = metric
   return (
@@ -46,17 +54,17 @@ export function MetricCard({ metric, active, pinned, onHover, onTogglePin }: Met
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h4 className="text-sm font-semibold text-ink">{definition.label}</h4>
+          <h4 className="text-sm font-semibold text-ink">{label}</h4>
           {definition.goldenEligible && (
             <p className="mt-1 text-xs font-semibold tracking-wide text-accent-700 uppercase">
-              Compared with φ
+              {t('results.metric.comparedWithPhi')}
             </p>
           )}
         </div>
         <button
           type="button"
           aria-pressed={pinned}
-          aria-label={`${pinned ? 'Stop showing' : 'Keep showing'} ${definition.label} on the photo`}
+          aria-label={t(pinned ? 'results.metric.pinHide' : 'results.metric.pinShow', { label })}
           onClick={() => onTogglePin(metric.id)}
           className={cn(
             'no-print grid size-9 shrink-0 place-items-center rounded-full border text-muted hover:border-ink hover:text-ink',
@@ -70,26 +78,29 @@ export function MetricCard({ metric, active, pinned, onHover, onTogglePin }: Met
       <p className="mt-3 flex items-baseline gap-2">
         <span className="font-display text-4xl font-medium text-ink tabular-nums">{formatRatio(metric.ratio)}</span>
         <span className="text-xs text-muted">
-          {metric.numerator.label} ÷ {metric.denominator.label}
+          {t('results.metric.ratioOf', {
+            numerator: segmentName(metric.numerator.id),
+            denominator: segmentName(metric.denominator.id),
+          })}
         </span>
       </p>
 
       {golden ? (
         <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 rounded-xl bg-accent-50 p-3.5 text-sm">
           <div>
-            <dt className="text-xs text-muted">Reference ratio φ</dt>
+            <dt className="text-xs text-muted">{t('results.metric.referenceRatio')}</dt>
             <dd className="font-semibold tabular-nums">{formatRatio(PHI)}</dd>
           </div>
           <div>
-            <dt className="text-xs text-muted">Measured r (larger ÷ smaller)</dt>
+            <dt className="text-xs text-muted">{t('results.metric.measuredR')}</dt>
             <dd className="font-semibold tabular-nums">{formatRatio(golden.ratio)}</dd>
           </div>
           <div>
-            <dt className="text-xs text-muted">Relative deviation from φ</dt>
+            <dt className="text-xs text-muted">{t('results.metric.deviation')}</dt>
             <dd className="font-semibold tabular-nums">{formatPercent(golden.error * 100)}</dd>
           </div>
           <div>
-            <dt className="text-xs text-muted">Geometric similarity to the reference golden ratio</dt>
+            <dt className="text-xs text-muted">{t('results.metric.similarity')}</dt>
             <dd className="font-semibold tabular-nums">{formatPercent(golden.similarity, 0)}</dd>
           </div>
           <div className="col-span-2" aria-hidden="true">
@@ -100,33 +111,39 @@ export function MetricCard({ metric, active, pinned, onHover, onTogglePin }: Met
         </dl>
       ) : (
         <p className="mt-3 text-xs leading-relaxed text-muted">
-          Plain proportion — {definition.goldenNote.charAt(0).toLowerCase() + definition.goldenNote.slice(1)}
+          {t('results.metric.plain', { note: goldenNote.charAt(0).toLocaleLowerCase(lang) + goldenNote.slice(1) })}
         </p>
       )}
 
       <details className="group mt-4 text-sm">
         <summary className="cursor-pointer rounded text-sm font-medium text-ink underline decoration-accent-400 decoration-2 underline-offset-4 marker:text-accent-700">
-          How is this measured?
+          {t('results.metric.how')}
         </summary>
         <div className="mt-3 space-y-2.5 leading-relaxed text-muted">
-          <p>{definition.meaning}</p>
+          <p>{t(`metrics.items.${metric.id}.meaning`)}</p>
           <p>
-            <span className="font-semibold text-ink">Formula: </span>
-            {definition.formula}
+            <span className="font-semibold text-ink">{t('results.metric.formula')} </span>
+            {t(`metrics.items.${metric.id}.formula`)}
           </p>
           <p>
-            <span className="font-semibold text-ink">Measured values: </span>
-            {metric.numerator.label} {metric.numerator.value.toFixed(0)} px ({metric.numerator.source}),{' '}
-            {metric.denominator.label} {metric.denominator.value.toFixed(0)} px ({metric.denominator.source}).
+            <span className="font-semibold text-ink">{t('results.metric.values')} </span>
+            {t('results.metric.valuesText', {
+              numerator: segmentName(metric.numerator.id),
+              numeratorPx: metric.numerator.value.toFixed(0),
+              numeratorSource: t(metric.numerator.source),
+              denominator: segmentName(metric.denominator.id),
+              denominatorPx: metric.denominator.value.toFixed(0),
+              denominatorSource: t(metric.denominator.source),
+            })}
           </p>
           <p>
-            <span className="font-semibold text-ink">Golden-ratio comparison: </span>
-            {definition.goldenNote}
+            <span className="font-semibold text-ink">{t('results.metric.goldenComparison')} </span>
+            {goldenNote}
           </p>
-          {definition.caveat && (
+          {definition.hasCaveat && (
             <p>
-              <span className="font-semibold text-ink">Keep in mind: </span>
-              {definition.caveat}
+              <span className="font-semibold text-ink">{t('results.metric.keepInMind')} </span>
+              {t(`metrics.items.${metric.id}.caveat` as MsgKey)}
             </p>
           )}
         </div>

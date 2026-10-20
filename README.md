@@ -23,6 +23,7 @@ golden ratio (φ ≈ 1.618) — as a piece of geometry, not as a judgement of pe
 - [How the analysis works](#how-the-analysis-works)
 - [Architecture](#architecture)
 - [Privacy](#privacy)
+- [Languages](#languages)
 - [Deploying](#deploying)
 - [Testing](#testing)
 - [Limitations](#limitations)
@@ -39,6 +40,7 @@ golden ratio (φ ≈ 1.618) — as a piece of geometry, not as a judgement of pe
 | Golden ratio | Documented formula, configurable `k`, only for 3 ratios with a recognised φ claim (see below).                                                                                                                                                            |
 | Results      | Overlay on the photo with toggleable layers, face-focused view, zoom, hover/pin highlighting, bar chart, quality report, formula + limitation notes.                                                                                                      |
 | Actions      | Analyze another photo, **PNG report**, print / save as PDF, clear photo & results.                                                                                                                                                                        |
+| Languages    | English and Tiếng Việt: detected from `?lang=` or the browser, switched with the EN / VI buttons, never stored (see [Languages](#languages)).                                                                                                              |
 | Quality      | Responsive, keyboard accessible (WCAG 2.1 AA checked with axe), `prefers-reduced-motion` aware, SEO metadata, per-route static HTML for GitHub Pages.                                                                                                     |
 
 ## Tech stack
@@ -164,6 +166,7 @@ rejected.
 ```
 src/
   components/            shared UI (layout, ui primitives, brand, illustration)
+  i18n/                  translations (locales/en, locales/vi), useI18n(), language detection
   pages/                 Home, Analysis, About, Privacy, NotFound
   features/
     camera/              useCamera hook, camera errors, CameraModal
@@ -193,11 +196,52 @@ UI, image handling, measurement maths and scoring are separate: `measurements.ts
 
 - Photos, camera frames and landmarks are processed in memory in the browser and never sent anywhere.
 - Nothing is written to `localStorage`, `sessionStorage`, IndexedDB or cookies. There are no analytics or trackers.
+  That includes the language choice: it is detected on every visit and kept in memory only.
 - Temporary object URLs are revoked immediately; canvases are released; the camera stream is stopped; the model is
   freed when leaving the Analysis page.
 - No face recognition, no identity or sensitive-attribute inference. Expression scores are used locally only to warn
   that a smile/open mouth affects the numbers.
 - The Privacy page (`/privacy`) describes this behaviour, including the network requests the app makes.
+
+## Languages
+
+The interface is available in **English** (the default) and **Tiếng Việt**.
+
+- The language is taken from, in order: a `?lang=vi` link, the browser's language preferences, then English. The
+  EN / VI buttons in the header change it for the visit. Share `…/?lang=vi` to link straight to a language.
+- **The choice is not saved** — GoldenFace promises to store nothing, so the language is detected again on every
+  visit and kept in memory while the tab is open.
+- The static HTML shells (title, description and Open Graph tags that crawlers and link previews read) are English
+  only; the page title and description are translated as soon as the app loads.
+- Numbers keep a dot as the decimal separator in every language (`1.618`), matching the formulas shown on screen.
+
+### How it is organised
+
+```
+src/i18n/
+  locales/en/*.ts   English, the source of truth — one file per area (home, about, results, quality, …)
+  locales/vi/*.ts   Vietnamese, typed against the English files: a missing or extra key is a compile error
+  translate.ts      lookup, {placeholders}, language detection, msg()
+  context.ts        useI18n() → { t, list, rich, lang, setLang }
+```
+
+- Components call `const { t } = useI18n()` and `t('home.hero.title')`; keys are type-checked. Messages can contain
+  `{name}` placeholders and simple `<b>…</b>` markup (rendered with `rich()`).
+- **Analysis code never holds text.** Measurements, quality checks and errors return ids and `Msg` values — for
+  example `msg('quality.checks.faceSize.warn', { px: 150 })` — and the interface translates them when it draws. That
+  is why switching language while results are on screen translates everything, including the notes and the reasons a
+  measurement was skipped, without analysing the photo again. The PNG report and the labels drawn on the photo receive
+  a translator the same way.
+- A `Msg` can be a parameter of another `Msg`, which is how a list such as "smiling, mouth open" follows the language.
+
+### Adding a language
+
+1. Add its code to `Lang` (`src/i18n/types.ts`), to `LANGUAGES` and `DICTIONARIES` (`src/i18n/translate.ts`).
+2. Copy `src/i18n/locales/vi/` to `locales/<code>/` and translate each file. `npm run typecheck` lists anything missing.
+3. Run `npm test`: `i18n.test.tsx` checks that every key exists in every language and that the `{placeholders}` and
+   `<tags>` match the English text.
+
+The header shows one button per language, which suits two or three; with more, replace `LanguageSwitcher` by a menu.
 
 ## Deploying
 
@@ -238,7 +282,7 @@ Cloudflare Pages, S3…) — set `VITE_BASE_PATH` to match.
 ## Testing
 
 ```bash
-npm test            # ~290 unit/component tests
+npm test            # ~350 unit/component tests
 npm run test:e2e    # Playwright, desktop + mobile (Pixel 7) Chrome, real MediaPipe model
 ```
 
@@ -247,14 +291,17 @@ synthetic face with known answers (scale / translation / roll invariance, asymme
 pose and quality checks, the analysis pipeline (no face, several faces, tile-only faces, turned head, small/cut-off
 face, darkness, model failures, cancellation), file validation and canvas editing, the camera (permission states,
 switching, capture/retake, **releasing every track** on close / Escape / unmount / late permission / `pagehide`),
-the Analysis page flow with all error states, the results UI, the model loader, pages, navigation and overlay drawing.
+the Analysis page flow with all error states, the results UI, the model loader, pages, navigation and overlay drawing,
+and the translations (identical keys, placeholders and tags in every language; the results, errors and PNG report
+rendered in Vietnamese; switching language while results are on screen).
 
 End-to-end tests use the locally installed Google Chrome (no browser download) with Chrome's fake camera. They need
 network access once to fetch a neutral sample portrait published by MediaPipe into `e2e/.fixtures/` (git-ignored; no
 photos of people are stored in the repository); without it, the tests that need a real face skip themselves. They
 verify, among other things: the real analysis end to end, that **no external or non-GET request is ever made**, that no
 storage is used, camera release in real Chrome, axe WCAG 2.1 A/AA checks across pages and states, keyboard
-behaviour, no horizontal scrolling from 320 px to 1440 px, PNG download, print styling and per-route static HTML.
+behaviour, no horizontal scrolling from 320 px to 1440 px, PNG download, print styling and per-route static HTML, plus
+language detection, switching and a Vietnamese analysis run (with nothing stored).
 
 ## Limitations
 
@@ -270,14 +317,9 @@ behaviour, no horizontal scrolling from 320 px to 1440 px, PNG download, print s
 - Quality thresholds are heuristics calibrated on a handful of test photos, not a validated clinical protocol.
 - The first analysis downloads ~4 MB (model) plus ~13 MB (WASM engine) and needs an internet connection; afterwards
   the browser cache serves them.
-- The UI is English only.
+- The interface is English and Vietnamese only; the translations were written for this project and have not been
+  reviewed by a second native speaker. The static HTML shells stay English.
 
 ## Credits
 
 Facial landmarks by [Google MediaPipe](https://ai.google.dev/edge/mediapipe) (Apache-2.0). Code: MIT.
-
-Còn thiếu
-Chưa có đa ngôn ngữ, giao diện chỉ tiếng Anh.
-Tải PDF trực tiếp chưa làm. Hiện dùng PNG và Print → Save as PDF của trình duyệt.
-Chưa test trên Safari và Firefox thật. Camera mặt sau, camera đổi trên điện thoại thật cũng chưa thử, vì Chrome giả lập chỉ có một camera.
-Ảnh người thật chỉ dùng để thử trong thư mục tạm, không đưa vào repo. E2E tự tải ảnh mẫu của MediaPipe về e2e/.fixtures/ (đã gitignore), nên cần có mạng ở lần chạy đầu.

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { translate } from '@/i18n'
 import { PHI } from '@/features/face-analysis/golden-ratio'
 import { LM } from '@/features/face-analysis/landmarks'
 import { InvalidLandmarksError, computeMeasurements } from '@/features/face-analysis/measurements'
@@ -16,7 +17,7 @@ function metric(metrics: MetricResult[], id: string): MetricResult {
 
 function ok(metrics: MetricResult[], id: string): RatioMetricResult {
   const found = metric(metrics, id)
-  if (found.status !== 'ok') throw new Error(`metric ${id} was skipped: ${found.reason}`)
+  if (found.status !== 'ok') throw new Error(`metric ${id} was skipped: ${translate('en', found.reason)}`)
   return found
 }
 
@@ -72,7 +73,7 @@ describe('computeMeasurements on a synthetic face with known geometry', () => {
     for (const id of ['third-upper-middle', 'third-upper-lower']) {
       const skipped = metric(result.metrics, id)
       expect(skipped.status).toBe('skipped')
-      if (skipped.status === 'skipped') expect(skipped.reason).toMatch(/hairline/i)
+      if (skipped.status === 'skipped') expect(translate('en', skipped.reason)).toMatch(/hairline/i)
     }
     expect(result.thirds.upper).toBeNull()
     expect(result.thirds.complete).toBe(false)
@@ -208,7 +209,7 @@ describe('missing or invalid landmarks', () => {
     for (const id of ['nose-intercanthal', 'mouth-nose']) {
       const skipped = metric(result.metrics, id)
       expect(skipped.status).toBe('skipped')
-      if (skipped.status === 'skipped') expect(skipped.reason).toMatch(/129/)
+      if (skipped.status === 'skipped') expect(translate('en', skipped.reason)).toMatch(/129/)
     }
     expect(metric(result.metrics, 'face-length-width').status).toBe('ok')
     expect(metric(result.metrics, 'cheekbone-jaw').status).toBe('ok')
@@ -237,7 +238,7 @@ describe('missing or invalid landmarks', () => {
     expect(result.segments['face-width']?.value).toBe(0)
     const skipped = metric(result.metrics, 'face-length-width')
     expect(skipped.status).toBe('skipped')
-    if (skipped.status === 'skipped') expect(skipped.reason).toMatch(/zero|invalid/i)
+    if (skipped.status === 'skipped') expect(translate('en', skipped.reason)).toMatch(/zero|invalid/i)
   })
 
   it('falls back to the eye corners when the iris landmarks are absent', () => {
@@ -258,7 +259,7 @@ describe('missing or invalid landmarks', () => {
     const result = measure({ [LM.lowerLipInner]: { x: 500, y: 660 }, [LM.lowerLipBottom]: { x: 500, y: 690 } })
     const skipped = metric(result.metrics, 'lip-ratio')
     expect(skipped.status).toBe('skipped')
-    if (skipped.status === 'skipped') expect(skipped.reason).toMatch(/mouth is open/i)
+    if (skipped.status === 'skipped') expect(translate('en', skipped.reason)).toMatch(/mouth is open/i)
   })
 })
 

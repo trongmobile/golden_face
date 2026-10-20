@@ -1,3 +1,5 @@
+import { msg, type Msg, type MsgKey } from '@/i18n'
+
 export type CameraErrorKind =
   | 'insecure'
   | 'unsupported'
@@ -6,44 +8,24 @@ export type CameraErrorKind =
   | 'in-use'
   | 'unknown'
 
+/** Both texts are language-independent messages: render them with `t(error.title)` / `t(error.message)`. */
 export interface CameraError {
   kind: CameraErrorKind
-  title: string
-  message: string
+  title: Msg
+  message: Msg
 }
 
-const ERRORS: Record<CameraErrorKind, Omit<CameraError, 'kind'>> = {
-  insecure: {
-    title: 'Camera needs a secure connection',
-    message:
-      'Browsers only allow camera access on HTTPS pages (or localhost). Open this site over https:// or upload a photo instead.',
-  },
-  unsupported: {
-    title: 'Camera is not supported here',
-    message: 'This browser cannot access a camera. Try a current version of Chrome, Edge, Firefox or Safari, or upload a photo instead.',
-  },
-  denied: {
-    title: 'Camera permission was blocked',
-    message:
-      'GoldenFace cannot use the camera because permission was denied. Allow camera access for this site in your browser settings (usually the lock icon in the address bar), then try again — or upload a photo instead.',
-  },
-  'not-found': {
-    title: 'No camera found',
-    message: 'No camera was detected on this device. Connect a camera, or upload a photo instead.',
-  },
-  'in-use': {
-    title: 'The camera is busy',
-    message:
-      'The camera could not be started, possibly because another app or tab is using it. Close other apps that use the camera and try again.',
-  },
-  unknown: {
-    title: 'The camera could not be started',
-    message: 'Something went wrong while starting the camera. Please try again, or upload a photo instead.',
-  },
+const KEYS: Record<CameraErrorKind, { title: MsgKey; message: MsgKey }> = {
+  insecure: { title: 'camera.errors.insecure.title', message: 'camera.errors.insecure.message' },
+  unsupported: { title: 'camera.errors.unsupported.title', message: 'camera.errors.unsupported.message' },
+  denied: { title: 'camera.errors.denied.title', message: 'camera.errors.denied.message' },
+  'not-found': { title: 'camera.errors.notFound.title', message: 'camera.errors.notFound.message' },
+  'in-use': { title: 'camera.errors.inUse.title', message: 'camera.errors.inUse.message' },
+  unknown: { title: 'camera.errors.unknown.title', message: 'camera.errors.unknown.message' },
 }
 
 export function cameraError(kind: CameraErrorKind): CameraError {
-  return { kind, ...ERRORS[kind] }
+  return { kind, title: msg(KEYS[kind].title), message: msg(KEYS[kind].message) }
 }
 
 /** Maps a getUserMedia failure to a user-facing error. */

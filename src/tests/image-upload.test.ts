@@ -7,6 +7,7 @@ import {
   validateImageFile,
 } from '@/features/image-upload/file-validation'
 import { MIN_CROP_SIZE, resizeRect } from '@/features/image-upload/crop-utils'
+import { translate } from '@/i18n'
 import {
   FULL_RECT,
   applyEdits,
@@ -250,5 +251,44 @@ describe('decodeImageFile', () => {
     const canvas = await decodeImageFile(file(JPEG, 'a.jpg', 'image/jpeg'))
     expect([canvas.width, canvas.height]).toEqual([320, 240])
     expect(revoke).toHaveBeenCalledWith('blob:temp')
+  })
+})
+
+describe('ImageFileError messages', () => {
+  it('carry a language-independent message, with the English text kept for developers', async () => {
+    const big = new File([new Uint8Array(MAX_FILE_BYTES + 1)], 'big.jpg', { type: 'image/jpeg' })
+    const error = (await validateImageFile(big).catch((e: unknown) => e)) as ImageFileError
+    expect(error.msg.key).toBe('upload.errors.tooLarge')
+    expect(error.msg.params).toMatchObject({ limit: 15 })
+    expect(error.message).toBe(translate('en', error.msg))
+    expect(translate('vi', error.msg)).toMatch(/Giới hạn là 15 MB/)
+    expect(translate('vi', error.msg)).not.toMatch(/\{/)
+  })
+
+  it.each([
+    ['empty', file([], 'a.jpg', 'image/jpeg'), 'upload.errors.empty', /Tệp này trống/],
+    ['unsupported type', file([0x25, 0x50, 0x44, 0x46, 0x2d, 1, 2, 3], 'a.pdf', 'application/pdf'), 'upload.errors.unsupportedType', /không được hỗ trợ/],
+    ['disguised HTML', file(HTML, 'evil.jpg', 'image/jpeg'), 'upload.errors.notRealImage', /không giống ảnh JPG, PNG hoặc WebP thật/],
+  ])('translates the %s error into Vietnamese', async (_name, f, key, vietnamese) => {
+    const error = (await validateImageFile(f).catch((e: unknown) => e)) as ImageFileError
+    expect(error).toBeInstanceOf(ImageFileError)
+    expect(error.msg.key).toBe(key)
+    expect(translate('vi', error.msg)).toMatch(vietnamese)
+  })
+
+  it('reports an undecodable image with a translatable message', async () => {
+    vi.stubGlobal('createImageBitmap', async () => {
+      throw new DOMException('bad', 'InvalidStateError')
+    })
+    vi.stubGlobal('Image', class {
+      decoding = ''
+      src = ''
+      decode() {
+        return Promise.reject(new Error('nope'))
+      }
+    })
+    const error = (await decodeImageFile(file(JPEG, 'a.jpg', 'image/jpeg')).catch((e: unknown) => e)) as ImageFileError
+    expect(error.msg.key).toBe('upload.errors.cannotOpen')
+    expect(translate('vi', error.msg)).toMatch(/Không thể mở ảnh này/)
   })
 })
