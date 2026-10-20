@@ -18,7 +18,7 @@ function List({ items }: { items: ReactNode[] }) {
     <ul className="space-y-2.5">
       {items.map((item, index) => (
         <li key={index} className="flex gap-3">
-          <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rounded-full bg-champagne-600" />
+          <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rounded-full bg-accent-600" />
           <span>{item}</span>
         </li>
       ))}

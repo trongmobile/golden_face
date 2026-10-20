@@ -66,7 +66,7 @@ export function AboutPage() {
             faces is weak.
           </p>
         </div>
-        <Card className="self-start bg-champagne-50">
+        <Card className="self-start bg-accent-50">
           <h3 className="font-display text-xl font-medium text-ink">How GoldenFace compares a ratio with φ</h3>
           <ol className="mt-4 space-y-3 text-sm leading-relaxed text-muted">
             <li>
@@ -86,7 +86,7 @@ export function AboutPage() {
             of beauty.
           </p>
           {example.valid && (
-            <p className="mt-4 rounded-xl border border-champagne-200 bg-paper p-3.5 text-sm text-muted">
+            <p className="mt-4 rounded-xl border border-accent-200 bg-paper p-3.5 text-sm text-muted">
               <span className="font-semibold text-ink">Example. </span>A = 1.45, B = 1 gives r = {formatRatio(example.ratio, 2)},
               error = {(example.error * 100).toFixed(1)} %, similarity ={' '}
               {example.similarity.toFixed(0)} %. The percentage is called the “geometric similarity to the reference
@@ -113,7 +113,7 @@ export function AboutPage() {
         >
           <table className="w-full min-w-[44rem] text-left text-sm">
             <caption className="sr-only">Measurements, formulas and whether each is compared with the golden ratio</caption>
-            <thead className="border-b border-line bg-ivory text-xs text-muted">
+            <thead className="border-b border-line bg-mist text-xs text-muted">
               <tr>
                 <th scope="col" className="px-4 py-3 font-medium">Measurement</th>
                 <th scope="col" className="px-4 py-3 font-medium">Formula and landmarks</th>
@@ -129,7 +129,7 @@ export function AboutPage() {
                   </th>
                   <td className="px-4 py-3.5 text-muted">{metric.formula}</td>
                   <td className="px-4 py-3.5 text-muted">
-                    <span className={metric.goldenEligible ? 'font-semibold text-champagne-700' : 'font-semibold text-ink'}>
+                    <span className={metric.goldenEligible ? 'font-semibold text-accent-700' : 'font-semibold text-ink'}>
                       {metric.goldenEligible ? 'Yes' : 'No'}
                     </span>
                     <span className="mt-0.5 block text-xs">{metric.goldenNote}</span>
@@ -161,7 +161,7 @@ export function AboutPage() {
             </li>
           ))}
         </ul>
-        <div className="mt-10 rounded-panel border border-champagne-200 bg-champagne-50 p-6 sm:p-8">
+        <div className="mt-10 rounded-panel border border-accent-200 bg-accent-50 p-6 sm:p-8">
           <p className="font-display text-2xl font-medium text-ink">
             The golden ratio is a way to look at geometry — not a way to measure a person.
           </p>

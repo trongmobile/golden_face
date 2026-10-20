@@ -86,9 +86,9 @@ export function paintAnnotated(
 
 // Hues chosen to stay readable on photos and to avoid the red/green good-vs-bad convention.
 const COLORS = {
-  width: '#f2cf86',
-  vertical: '#9fd0ff',
-  accent: '#ffe2a6',
+  width: '#5eead4',
+  vertical: '#c4b5fd',
+  accent: '#a7f3e6',
   contour: 'rgba(255,255,255,0.9)',
   mesh: 'rgba(255,255,255,0.22)',
   casing: 'rgba(12,14,22,0.6)',

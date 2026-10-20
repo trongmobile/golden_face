@@ -43,12 +43,12 @@ export function AnalyzingPanel({ image, stage, modelProgress, onCancel }: Analyz
       <div className="mx-auto grid max-w-4xl gap-8 md:grid-cols-[minmax(0,18rem)_1fr] md:items-start">
         <div className="relative mx-auto w-full max-w-xs overflow-hidden rounded-card border border-line bg-ink/5">
           <CanvasPreview source={image} maxSide={600} label="The photo being analyzed" className="block h-auto w-full" />
-          <div className="absolute inset-0 animate-pulse bg-champagne-100/20" aria-hidden="true" />
+          <div className="absolute inset-0 animate-pulse bg-accent-100/20" aria-hidden="true" />
         </div>
 
         <Card>
           <div role="status" aria-live="polite">
-            <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-champagne-700 uppercase">
+            <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-accent-700 uppercase">
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               Analyzing on your device
             </p>

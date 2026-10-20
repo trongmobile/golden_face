@@ -6,8 +6,8 @@ import { cn } from '@/utils/cn'
  * Purely illustrative — it is not generated from any photo.
  */
 export function FaceGeometry({ className }: { className?: string }) {
-  const gold = 'var(--color-champagne-500)'
-  const goldDeep = 'var(--color-champagne-700)'
+  const gold = 'var(--color-accent-500)'
+  const goldDeep = 'var(--color-accent-700)'
   const ink = 'var(--color-navy)'
 
   return (
@@ -18,7 +18,7 @@ export function FaceGeometry({ className }: { className?: string }) {
       className={cn('h-auto w-full', className)}
     >
       {/* soft backdrop */}
-      <ellipse cx="210" cy="262" rx="196" ry="244" fill="var(--color-champagne-50)" />
+      <ellipse cx="210" cy="262" rx="196" ry="244" fill="var(--color-accent-50)" />
 
       {/* golden rectangle and its square subdivisions */}
       <g fill="none" stroke={gold} strokeWidth="1" opacity="0.7">

@@ -11,8 +11,8 @@ golden ratio (φ ≈ 1.618) — as a piece of geometry, not as a judgement of pe
 - **Nothing is uploaded or stored.** There is no back end.
 
 > **The golden ratio is one geometric reference, not a standard of beauty.** GoldenFace never produces a "beauty
-> score", never ranks faces and never identifies anyone. The only percentage it shows is the *geometric similarity of
-> one ratio to φ*, and only for ratios that have a recognised golden-ratio claim.
+> score", never ranks faces and never identifies anyone. The only percentage it shows is the _geometric similarity of
+> one ratio to φ_, and only for ratios that have a recognised golden-ratio claim.
 
 ## Contents
 
@@ -29,17 +29,17 @@ golden ratio (φ ≈ 1.618) — as a piece of geometry, not as a judgement of pe
 
 ## Features
 
-| Area | What you get |
-| --- | --- |
-| Home | Hero, how-it-works, explanation of φ and its limits, privacy statement, footer with privacy + terms. |
-| Upload | File picker or drag & drop, type + size + real-content (magic byte) validation, preview, rotate, crop (pointer **and** keyboard), EXIF-aware decoding. |
-| Camera | `getUserMedia` with front/rear switching, live preview with face guide, capture / retake / use. Handles denied, missing, busy and unsupported cameras and non-HTTPS pages. Every track is stopped on capture, close, Escape, route change and `pagehide`. |
-| Detection | Lazy-loaded model with download progress, GPU → CPU fallback, single-face enforcement (extra tile scan catches small faces), pose / size / framing / lighting / sharpness / expression checks. |
-| Measurements | 10 ratios (overall + vertical thirds), symmetry vs. the facial midline, optional **manual hairline** marking. |
-| Golden ratio | Documented formula, configurable `k`, only for 3 ratios with a recognised φ claim (see below). |
-| Results | Overlay on the photo with toggleable layers, face-focused view, zoom, hover/pin highlighting, bar chart, quality report, formula + limitation notes. |
-| Actions | Analyze another photo, **PNG report**, print / save as PDF, clear photo & results. |
-| Quality | Responsive, keyboard accessible (WCAG 2.1 AA checked with axe), `prefers-reduced-motion` aware, SEO metadata, per-route static HTML for GitHub Pages. |
+| Area         | What you get                                                                                                                                                                                                                                              |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Home         | Hero, how-it-works, explanation of φ and its limits, privacy statement, footer with privacy + terms.                                                                                                                                                      |
+| Upload       | File picker or drag & drop, type + size + real-content (magic byte) validation, preview, rotate, crop (pointer **and** keyboard), EXIF-aware decoding.                                                                                                    |
+| Camera       | `getUserMedia` with front/rear switching, live preview with face guide, capture / retake / use. Handles denied, missing, busy and unsupported cameras and non-HTTPS pages. Every track is stopped on capture, close, Escape, route change and `pagehide`. |
+| Detection    | Lazy-loaded model with download progress, GPU → CPU fallback, single-face enforcement (extra tile scan catches small faces), pose / size / framing / lighting / sharpness / expression checks.                                                            |
+| Measurements | 10 ratios (overall + vertical thirds), symmetry vs. the facial midline, optional **manual hairline** marking.                                                                                                                                             |
+| Golden ratio | Documented formula, configurable `k`, only for 3 ratios with a recognised φ claim (see below).                                                                                                                                                            |
+| Results      | Overlay on the photo with toggleable layers, face-focused view, zoom, hover/pin highlighting, bar chart, quality report, formula + limitation notes.                                                                                                      |
+| Actions      | Analyze another photo, **PNG report**, print / save as PDF, clear photo & results.                                                                                                                                                                        |
+| Quality      | Responsive, keyboard accessible (WCAG 2.1 AA checked with axe), `prefers-reduced-motion` aware, SEO metadata, per-route static HTML for GitHub Pages.                                                                                                     |
 
 ## Tech stack
 
@@ -78,39 +78,39 @@ The model is only downloaded when a user starts an analysis, so the home page st
 
 ## Scripts
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Dev server. |
-| `npm run build` | Typecheck (`tsc -b`) and production build to `dist/`. |
-| `npm run preview` | Serve `dist/` locally. |
-| `npm run lint` | ESLint (typescript-eslint, react-hooks, react-refresh). |
-| `npm run typecheck` | `tsc -b --noEmit` for app, tests and tooling. |
-| `npm test` | Vitest unit + component tests. |
-| `npm run test:e2e` | Playwright end-to-end tests (desktop + mobile Chrome). |
-| `npm run check` | lint → typecheck → test → build. |
+| Command             | Purpose                                                 |
+| ------------------- | ------------------------------------------------------- |
+| `npm run dev`       | Dev server.                                             |
+| `npm run build`     | Typecheck (`tsc -b`) and production build to `dist/`.   |
+| `npm run preview`   | Serve `dist/` locally.                                  |
+| `npm run lint`      | ESLint (typescript-eslint, react-hooks, react-refresh). |
+| `npm run typecheck` | `tsc -b --noEmit` for app, tests and tooling.           |
+| `npm test`          | Vitest unit + component tests.                          |
+| `npm run test:e2e`  | Playwright end-to-end tests (desktop + mobile Chrome).  |
+| `npm run check`     | lint → typecheck → test → build.                        |
 
 ## How the analysis works
 
 ### Coordinates
 
 MediaPipe returns normalised landmarks. They are converted to **image pixels** (so x and y share one scale) and then
-expressed in a **face-aligned frame**: the *u* axis runs through the two pupils and *v* is perpendicular to it. Distances
+expressed in a **face-aligned frame**: the _u_ axis runs through the two pupils and _v_ is perpendicular to it. Distances
 are measured along these axes, so they do not change with head roll, image size or position.
 
 ### Measurements
 
 Landmark numbers refer to the 478-point face mesh ("right"/"left" = the subject's right/left).
 
-| Ratio | Formula (landmarks) | Compared with φ? |
-| --- | --- | --- |
-| Face length ÷ face width | 10 → 152 ÷ 234 ↔ 454 | **Yes** |
-| Forehead ÷ cheekbone width | 54 ↔ 284 ÷ 234 ↔ 454 | No |
-| Cheekbone ÷ jaw width | 234 ↔ 454 ÷ 172 ↔ 397 | No (jaw ÷ cheekbone is its reciprocal) |
-| Eye distance ÷ face width | iris centres 468 ↔ 473 ÷ 234 ↔ 454 | No (classical "five-eye" rule) |
-| Nose width ÷ eye distance | 129 ↔ 358 ÷ inner corners 133 ↔ 362 | No (classical canon is 1 : 1) |
-| Mouth ÷ nose width | 61 ↔ 291 ÷ 129 ↔ 358 | **Yes** |
-| Lower ÷ upper lip height | 14 → 17 ÷ 0 → 13 (mouth must be closed) | **Yes** |
-| Upper / middle / lower thirds | hairline → brow line → nose base (2) → chin (152) | No (classical canon is equal thirds) |
+| Ratio                         | Formula (landmarks)                               | Compared with φ?                       |
+| ----------------------------- | ------------------------------------------------- | -------------------------------------- |
+| Face length ÷ face width      | 10 → 152 ÷ 234 ↔ 454                              | **Yes**                                |
+| Forehead ÷ cheekbone width    | 54 ↔ 284 ÷ 234 ↔ 454                              | No                                     |
+| Cheekbone ÷ jaw width         | 234 ↔ 454 ÷ 172 ↔ 397                             | No (jaw ÷ cheekbone is its reciprocal) |
+| Eye distance ÷ face width     | iris centres 468 ↔ 473 ÷ 234 ↔ 454                | No (classical "five-eye" rule)         |
+| Nose width ÷ eye distance     | 129 ↔ 358 ÷ inner corners 133 ↔ 362               | No (classical canon is 1 : 1)          |
+| Mouth ÷ nose width            | 61 ↔ 291 ÷ 129 ↔ 358                              | **Yes**                                |
+| Lower ÷ upper lip height      | 14 → 17 ÷ 0 → 13 (mouth must be closed)           | **Yes**                                |
+| Upper / middle / lower thirds | hairline → brow line → nose base (2) → chin (152) | No (classical canon is equal thirds)   |
 
 Only ratios that have a commonly cited golden-ratio claim are compared with φ. Faces are not expected to equal 1.618
 everywhere, so every other ratio is shown as a plain proportion.
@@ -220,10 +220,10 @@ VITE_BASE_PATH=/golden_face/ VITE_SITE_URL=https://<owner>.github.io/golden_face
 # upload dist/ to any static host
 ```
 
-| Variable | Meaning | Default |
-| --- | --- | --- |
-| `VITE_BASE_PATH` | Path the site is served from (`/` for a custom domain, `/repo/` for a project page). | `/` |
-| `VITE_SITE_URL` | Public URL without trailing slash; enables canonical/Open Graph URLs, `sitemap.xml` and the sitemap line in `robots.txt`. | empty |
+| Variable         | Meaning                                                                                                                   | Default |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `VITE_BASE_PATH` | Path the site is served from (`/` for a custom domain, `/repo/` for a project page).                                      | `/`     |
+| `VITE_SITE_URL`  | Public URL without trailing slash; enables canonical/Open Graph URLs, `sitemap.xml` and the sitemap line in `robots.txt`. | empty   |
 
 The build also emits, for static hosts:
 
@@ -275,3 +275,9 @@ behaviour, no horizontal scrolling from 320 px to 1440 px, PNG download, print s
 ## Credits
 
 Facial landmarks by [Google MediaPipe](https://ai.google.dev/edge/mediapipe) (Apache-2.0). Code: MIT.
+
+Còn thiếu
+Chưa có đa ngôn ngữ, giao diện chỉ tiếng Anh.
+Tải PDF trực tiếp chưa làm. Hiện dùng PNG và Print → Save as PDF của trình duyệt.
+Chưa test trên Safari và Firefox thật. Camera mặt sau, camera đổi trên điện thoại thật cũng chưa thử, vì Chrome giả lập chỉ có một camera.
+Ảnh người thật chỉ dùng để thử trong thư mục tạm, không đưa vào repo. E2E tự tải ảnh mẫu của MediaPipe về e2e/.fixtures/ (đã gitignore), nên cần có mạng ở lần chạy đầu.

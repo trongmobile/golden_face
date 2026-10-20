@@ -22,11 +22,11 @@ export function MetricCard({ metric, active, pinned, onHover, onTogglePin }: Met
   if (metric.status === 'skipped') {
     return (
       <article
-        className="print-avoid-break rounded-2xl border border-dashed border-line-strong bg-ivory p-4"
+        className="print-avoid-break rounded-2xl border border-dashed border-line-strong bg-mist p-4"
         aria-label={`${definition.label}: not measured`}
       >
         <h4 className="text-sm font-semibold text-ink">{definition.label}</h4>
-        <p className="mt-1 text-xs font-semibold tracking-wide text-champagne-700 uppercase">Not measured</p>
+        <p className="mt-1 text-xs font-semibold tracking-wide text-accent-700 uppercase">Not measured</p>
         <p className="mt-1.5 text-sm leading-relaxed text-muted">{metric.reason}</p>
       </article>
     )
@@ -41,14 +41,14 @@ export function MetricCard({ metric, active, pinned, onHover, onTogglePin }: Met
       onBlur={() => onHover(null)}
       className={cn(
         'print-avoid-break rounded-2xl border bg-paper p-4 transition-colors sm:p-5',
-        active ? 'border-champagne-500 shadow-soft' : 'border-line',
+        active ? 'border-accent-500 shadow-soft' : 'border-line',
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h4 className="text-sm font-semibold text-ink">{definition.label}</h4>
           {definition.goldenEligible && (
-            <p className="mt-1 text-xs font-semibold tracking-wide text-champagne-700 uppercase">
+            <p className="mt-1 text-xs font-semibold tracking-wide text-accent-700 uppercase">
               Compared with φ
             </p>
           )}
@@ -60,7 +60,7 @@ export function MetricCard({ metric, active, pinned, onHover, onTogglePin }: Met
           onClick={() => onTogglePin(metric.id)}
           className={cn(
             'no-print grid size-9 shrink-0 place-items-center rounded-full border text-muted hover:border-ink hover:text-ink',
-            pinned ? 'border-ink bg-champagne-100 text-ink' : 'border-line',
+            pinned ? 'border-ink bg-accent-100 text-ink' : 'border-line',
           )}
         >
           {pinned ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
@@ -75,7 +75,7 @@ export function MetricCard({ metric, active, pinned, onHover, onTogglePin }: Met
       </p>
 
       {golden ? (
-        <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 rounded-xl bg-champagne-50 p-3.5 text-sm">
+        <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 rounded-xl bg-accent-50 p-3.5 text-sm">
           <div>
             <dt className="text-xs text-muted">Reference ratio φ</dt>
             <dd className="font-semibold tabular-nums">{formatRatio(PHI)}</dd>
@@ -93,8 +93,8 @@ export function MetricCard({ metric, active, pinned, onHover, onTogglePin }: Met
             <dd className="font-semibold tabular-nums">{formatPercent(golden.similarity, 0)}</dd>
           </div>
           <div className="col-span-2" aria-hidden="true">
-            <div className="h-1.5 overflow-hidden rounded-full bg-champagne-200">
-              <div className="h-full rounded-full bg-champagne-600" style={{ width: `${golden.similarity}%` }} />
+            <div className="h-1.5 overflow-hidden rounded-full bg-accent-200">
+              <div className="h-full rounded-full bg-accent-600" style={{ width: `${golden.similarity}%` }} />
             </div>
           </div>
         </dl>
@@ -105,7 +105,7 @@ export function MetricCard({ metric, active, pinned, onHover, onTogglePin }: Met
       )}
 
       <details className="group mt-4 text-sm">
-        <summary className="cursor-pointer rounded text-sm font-medium text-ink underline decoration-champagne-400 decoration-2 underline-offset-4 marker:text-champagne-700">
+        <summary className="cursor-pointer rounded text-sm font-medium text-ink underline decoration-accent-400 decoration-2 underline-offset-4 marker:text-accent-700">
           How is this measured?
         </summary>
         <div className="mt-3 space-y-2.5 leading-relaxed text-muted">

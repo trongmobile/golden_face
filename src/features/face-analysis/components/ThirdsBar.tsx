@@ -2,8 +2,8 @@ import { formatShare } from '@/utils/format'
 import type { ThirdsSummary } from '@/types'
 
 const PARTS = [
-  { key: 'upper', label: 'Upper third', hint: 'hairline → brows', tone: 'bg-champagne-300' },
-  { key: 'middle', label: 'Middle third', hint: 'brows → nose base', tone: 'bg-champagne-500' },
+  { key: 'upper', label: 'Upper third', hint: 'hairline → brows', tone: 'bg-accent-200' },
+  { key: 'middle', label: 'Middle third', hint: 'brows → nose base', tone: 'bg-accent-400' },
   { key: 'lower', label: 'Lower third', hint: 'nose base → chin', tone: 'bg-navy' },
 ] as const
 
@@ -24,7 +24,7 @@ export function ThirdsBar({ thirds }: { thirds: ThirdsSummary }) {
             return (
               <div
                 key={part.key}
-                className="grid flex-1 place-items-center border-r border-dashed border-line-strong bg-ivory px-2 text-center text-[11px] leading-tight text-muted last:border-r-0"
+                className="grid flex-1 place-items-center border-r border-dashed border-line-strong bg-mist px-2 text-center text-[11px] leading-tight text-muted last:border-r-0"
               >
                 Not measured
               </div>

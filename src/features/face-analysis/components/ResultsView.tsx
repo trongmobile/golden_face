@@ -78,7 +78,7 @@ export function ResultsView({ image, result, onAnalyzeAnother, onClear }: Result
 
       <header className="flex flex-wrap items-end justify-between gap-5">
         <div className="max-w-2xl">
-          <p className="text-xs font-semibold tracking-[0.18em] text-champagne-700 uppercase">Analysis complete</p>
+          <p className="text-xs font-semibold tracking-[0.18em] text-accent-700 uppercase">Analysis complete</p>
           <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-ink sm:text-5xl">
             Your facial proportions
           </h1>

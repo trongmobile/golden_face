@@ -171,11 +171,11 @@ describe('overlay controls', () => {
   it('emphasises a card while it is hovered or focused and drops it afterwards', async () => {
     const { user } = setup()
     const length = cardFor('Face length ÷ face width')
-    expect(length).not.toHaveClass('border-champagne-500')
+    expect(length).not.toHaveClass('border-accent-500')
     await user.hover(length)
-    expect(length).toHaveClass('border-champagne-500')
+    expect(length).toHaveClass('border-accent-500')
     await user.unhover(length)
-    expect(length).not.toHaveClass('border-champagne-500')
+    expect(length).not.toHaveClass('border-accent-500')
   })
 
   it('keeps a pinned measurement emphasised after the pointer leaves', async () => {
@@ -184,7 +184,7 @@ describe('overlay controls', () => {
     await user.click(within(mouth).getByRole('button', { name: /Keep showing/ }))
     await user.unhover(mouth)
     await user.click(document.body)
-    expect(mouth).toHaveClass('border-champagne-500')
+    expect(mouth).toHaveClass('border-accent-500')
   })
 })
 

@@ -10,9 +10,9 @@ const base =
 
 const variants: Record<ButtonVariant, string> = {
   primary: 'bg-navy text-white shadow-soft hover:bg-navy-soft',
-  gold: 'bg-champagne-500 text-ink shadow-soft hover:bg-champagne-400',
-  secondary: 'border border-line-strong bg-paper text-ink hover:border-ink hover:bg-ivory',
-  ghost: 'text-ink hover:bg-champagne-100',
+  gold: 'bg-accent-400 text-ink shadow-soft hover:bg-accent-300',
+  secondary: 'border border-line-strong bg-paper text-ink hover:border-ink hover:bg-mist',
+  ghost: 'text-ink hover:bg-accent-100',
   onDark: 'border border-white/25 bg-white/5 text-white hover:bg-white/15',
 }
 

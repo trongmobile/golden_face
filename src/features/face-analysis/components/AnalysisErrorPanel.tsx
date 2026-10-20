@@ -112,7 +112,7 @@ export function AnalysisErrorPanel({ error, onEdit, onRetry, onChoosePhoto }: An
           <ul className="mt-5 space-y-2.5">
             {copy.advice.map((tip) => (
               <li key={tip} className="flex gap-3 text-sm leading-relaxed text-muted">
-                <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-champagne-600" />
+                <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-accent-600" />
                 {tip}
               </li>
             ))}
@@ -121,7 +121,7 @@ export function AnalysisErrorPanel({ error, onEdit, onRetry, onChoosePhoto }: An
 
         {error.quality && failedChecks.length > 0 && (
           <details className="mt-5 text-sm">
-            <summary className="cursor-pointer font-medium text-ink underline decoration-champagne-400 decoration-2 underline-offset-4">
+            <summary className="cursor-pointer font-medium text-ink underline decoration-accent-400 decoration-2 underline-offset-4">
               See the quality checks
             </summary>
             <div className="mt-3">

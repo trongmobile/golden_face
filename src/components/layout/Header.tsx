@@ -15,7 +15,7 @@ const NAV_ITEMS = [
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
     'rounded-full px-4 py-2 text-sm font-medium transition-colors',
-    isActive ? 'bg-champagne-100 text-ink' : 'text-muted hover:text-ink',
+    isActive ? 'bg-accent-100 text-ink' : 'text-muted hover:text-ink',
   )
 
 export function Header() {
@@ -32,7 +32,7 @@ export function Header() {
   }, [menuOpen])
 
   return (
-    <header className="no-print sticky top-0 z-40 border-b border-line/80 bg-ivory/90 backdrop-blur-sm">
+    <header className="no-print sticky top-0 z-40 border-b border-line/80 bg-mist/90 backdrop-blur-sm">
       <div className="container-page flex h-16 items-center justify-between gap-4">
         <Link to="/" aria-label="GoldenFace home" className="rounded-lg" onClick={() => setMenuOpen(false)}>
           <Logo />
@@ -55,7 +55,7 @@ export function Header() {
           </div>
           <button
             type="button"
-            className="grid size-10 place-items-center rounded-full text-ink hover:bg-champagne-100 md:hidden"
+            className="grid size-10 place-items-center rounded-full text-ink hover:bg-accent-100 md:hidden"
             aria-expanded={menuOpen}
             aria-controls={menuId}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
@@ -70,7 +70,7 @@ export function Header() {
         id={menuId}
         aria-label="Mobile"
         hidden={!menuOpen}
-        className="border-t border-line bg-ivory md:hidden"
+        className="border-t border-line bg-mist md:hidden"
       >
         <ul className="container-page flex flex-col gap-1 py-3">
           {NAV_ITEMS.map((item) => (
@@ -80,7 +80,7 @@ export function Header() {
                 end={item.end}
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
-                  cn('block rounded-xl px-4 py-3 text-base font-medium', isActive ? 'bg-champagne-100 text-ink' : 'text-muted')
+                  cn('block rounded-xl px-4 py-3 text-base font-medium', isActive ? 'bg-accent-100 text-ink' : 'text-muted')
                 }
               >
                 {item.label}

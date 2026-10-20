@@ -14,10 +14,10 @@ export interface ReportInput {
 
 const WIDTH = 1240
 const PAD = 56
-const INK = '#14161f'
-const MUTED = '#5a5f6e'
-const GOLD = '#7a5e24'
-const LINE = '#e6e1d6'
+const INK = '#0f1b26'
+const MUTED = '#55626d'
+const ACCENT = '#145a56'
+const LINE = '#dce5e9'
 const FONT = '"Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif'
 const SERIF = '"Fraunces Variable", Georgia, "Times New Roman", serif'
 
@@ -57,7 +57,7 @@ export function renderReportCanvas({ image, result, measurements, layers }: Repo
   const ctx = scratch.getContext('2d')
   if (!ctx) throw new Error('Canvas 2D is not available in this browser.')
 
-  ctx.fillStyle = '#faf8f4'
+  ctx.fillStyle = '#f3f7f8'
   ctx.fillRect(0, 0, WIDTH, scratch.height)
   ctx.textBaseline = 'alphabetic'
 
@@ -66,7 +66,7 @@ export function renderReportCanvas({ image, result, measurements, layers }: Repo
   ctx.font = `500 40px ${SERIF}`
   ctx.fillText('Golden', PAD, PAD + 36)
   const goldenWidth = ctx.measureText('Golden').width
-  ctx.fillStyle = GOLD
+  ctx.fillStyle = ACCENT
   ctx.fillText('Face', PAD + goldenWidth, PAD + 36)
   ctx.fillStyle = MUTED
   ctx.font = `400 18px ${FONT}`
@@ -111,7 +111,7 @@ export function renderReportCanvas({ image, result, measurements, layers }: Repo
   const colX = PAD + photoWidth + 44
   const colWidth = WIDTH - PAD - colX
   let y = top + 16
-  ctx.fillStyle = GOLD
+  ctx.fillStyle = ACCENT
   ctx.font = `600 13px ${FONT}`
   ctx.fillText('PROPORTIONS', colX, y)
   y += 12
@@ -157,7 +157,7 @@ export function renderReportCanvas({ image, result, measurements, layers }: Repo
   // Full-width sections
   const fullWidth = WIDTH - PAD * 2
   const section = (title: string) => {
-    ctx.fillStyle = GOLD
+    ctx.fillStyle = ACCENT
     ctx.font = `600 13px ${FONT}`
     ctx.fillText(title.toUpperCase(), PAD, y)
     y += 26

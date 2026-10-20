@@ -7,7 +7,7 @@ export function LogoMark({ className }: { className?: string }) {
       <rect x="0.75" y="0.75" width="38.5" height="38.5" rx="11" className="fill-navy" />
       <path
         d="M31 33 A12 12 0 0 1 19 21 A7.4 7.4 0 0 1 26.4 13.6 A4.6 4.6 0 0 1 31 18.2 A2.8 2.8 0 0 1 28.2 21 A1.7 1.7 0 0 1 26.5 19.3"
-        stroke="#d4b87e"
+        stroke="#7fc6bf"
         strokeWidth="1.4"
         strokeLinecap="round"
       />
@@ -21,7 +21,7 @@ export function Logo({ className }: { className?: string }) {
     <span className={cn('inline-flex items-center gap-2.5', className)}>
       <LogoMark />
       <span className="font-display text-xl font-medium tracking-tight text-ink">
-        Golden<span className="text-champagne-700">Face</span>
+        Golden<span className="text-accent-700">Face</span>
       </span>
     </span>
   )

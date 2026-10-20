@@ -19,7 +19,7 @@ const RELIABILITY_COPY = {
 
 const STATUS_ICON: Record<QualityStatus, { Icon: typeof CheckCircle2; className: string; label: string }> = {
   pass: { Icon: CheckCircle2, className: 'text-navy', label: 'OK' },
-  warn: { Icon: AlertTriangle, className: 'text-champagne-700', label: 'Note' },
+  warn: { Icon: AlertTriangle, className: 'text-accent-700', label: 'Note' },
   fail: { Icon: XCircle, className: 'text-[#9a3f2b]', label: 'Problem' },
 }
 

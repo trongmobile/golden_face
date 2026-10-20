@@ -5,8 +5,8 @@ import { cn } from '@/utils/cn'
 export type AlertTone = 'info' | 'warning' | 'error' | 'success'
 
 const tones: Record<AlertTone, { box: string; icon: string; Icon: typeof Info }> = {
-  info: { box: 'border-line bg-champagne-50 text-ink', icon: 'text-champagne-700', Icon: Info },
-  warning: { box: 'border-champagne-300 bg-champagne-100/70 text-ink', icon: 'text-champagne-700', Icon: AlertTriangle },
+  info: { box: 'border-line bg-accent-50 text-ink', icon: 'text-accent-700', Icon: Info },
+  warning: { box: 'border-accent-300 bg-accent-100/70 text-ink', icon: 'text-accent-700', Icon: AlertTriangle },
   error: { box: 'border-[#e3c2b8] bg-[#fbf1ee] text-ink', icon: 'text-[#9a3f2b]', Icon: XCircle },
   success: { box: 'border-line bg-paper text-ink', icon: 'text-navy', Icon: CheckCircle2 },
 }

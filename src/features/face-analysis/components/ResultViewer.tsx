@@ -109,7 +109,7 @@ export function ResultViewer({
             aria-label="Zoom out"
             disabled={zoom <= MIN_ZOOM}
             onClick={() => setZoom((z) => clampZoom(z - ZOOM_STEP))}
-            className="grid size-9 place-items-center rounded-full hover:bg-champagne-100 disabled:opacity-40"
+            className="grid size-9 place-items-center rounded-full hover:bg-accent-100 disabled:opacity-40"
           >
             <Minus className="size-4" aria-hidden="true" />
           </button>
@@ -121,7 +121,7 @@ export function ResultViewer({
             aria-label="Zoom in"
             disabled={zoom >= MAX_ZOOM}
             onClick={() => setZoom((z) => clampZoom(z + ZOOM_STEP))}
-            className="grid size-9 place-items-center rounded-full hover:bg-champagne-100 disabled:opacity-40"
+            className="grid size-9 place-items-center rounded-full hover:bg-accent-100 disabled:opacity-40"
           >
             <Plus className="size-4" aria-hidden="true" />
           </button>
@@ -130,7 +130,7 @@ export function ResultViewer({
             aria-label="Reset zoom"
             disabled={zoom === 1}
             onClick={() => setZoom(1)}
-            className="grid size-9 place-items-center rounded-full hover:bg-champagne-100 disabled:opacity-40"
+            className="grid size-9 place-items-center rounded-full hover:bg-accent-100 disabled:opacity-40"
           >
             <RotateCcw className="size-4" aria-hidden="true" />
           </button>
@@ -176,7 +176,7 @@ export function ResultViewer({
       </div>
 
       {marking && (
-        <p role="status" className="no-print mb-3 rounded-xl bg-champagne-50 px-4 py-2.5 text-sm text-ink">
+        <p role="status" className="no-print mb-3 rounded-xl bg-accent-50 px-4 py-2.5 text-sm text-ink">
           Click the photo where your hairline is, or use the Up / Down buttons. The hairline is only used for the
           upper third and for face length — it is never guessed.
         </p>

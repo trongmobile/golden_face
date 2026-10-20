@@ -53,10 +53,10 @@ export function UploadDropzone({ onFile, busy = false, error, buttonRef }: Uploa
         data-testid="dropzone"
         className={cn(
           'flex flex-col items-center rounded-card border-2 border-dashed px-6 py-10 text-center transition-colors sm:py-14',
-          dragging ? 'border-champagne-600 bg-champagne-100' : 'border-line-strong bg-paper hover:border-champagne-500',
+          dragging ? 'border-accent-600 bg-accent-100' : 'border-line-strong bg-paper hover:border-accent-500',
         )}
       >
-        <span className="grid size-14 place-items-center rounded-full bg-champagne-100 text-champagne-700">
+        <span className="grid size-14 place-items-center rounded-full bg-accent-100 text-accent-700">
           {busy ? (
             <Loader2 className="size-6 animate-spin" aria-hidden="true" />
           ) : dragging ? (

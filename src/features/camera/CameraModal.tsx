@@ -97,7 +97,7 @@ function CameraSession({
     <div className="flex flex-col gap-4 p-4 sm:p-5">
       {showIntro && (
         <div className="py-6 text-center">
-          <span className="mx-auto grid size-14 place-items-center rounded-full bg-champagne-100 text-champagne-700">
+          <span className="mx-auto grid size-14 place-items-center rounded-full bg-accent-100 text-accent-700">
             <Camera className="size-6" aria-hidden="true" />
           </span>
           <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-muted">
@@ -111,8 +111,8 @@ function CameraSession({
       )}
 
       {status === 'starting' && (
-        <div role="status" className="flex items-center gap-3 rounded-2xl bg-champagne-50 p-4 text-sm text-ink">
-          <Loader2 className="size-5 shrink-0 animate-spin text-champagne-700" aria-hidden="true" />
+        <div role="status" className="flex items-center gap-3 rounded-2xl bg-accent-50 p-4 text-sm text-ink">
+          <Loader2 className="size-5 shrink-0 animate-spin text-accent-700" aria-hidden="true" />
           Waiting for camera access — choose “Allow” when your browser asks.
         </div>
       )}
@@ -183,7 +183,7 @@ function CameraSession({
               type="button"
               onClick={takePhoto}
               aria-label="Take photo"
-              className="grid size-[4.5rem] place-items-center rounded-full border-4 border-champagne-500 bg-paper shadow-soft transition-transform active:scale-95"
+              className="grid size-[4.5rem] place-items-center rounded-full border-4 border-accent-500 bg-paper shadow-soft transition-transform active:scale-95"
             >
               <span className="size-12 rounded-full bg-navy" />
             </button>

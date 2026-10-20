@@ -54,7 +54,7 @@ export function HomePage() {
       <section aria-labelledby="hero-title" className="relative overflow-hidden">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-40 -right-40 size-[38rem] rounded-full bg-champagne-100/70 blur-3xl"
+          className="pointer-events-none absolute -top-40 -right-40 size-[38rem] rounded-full bg-accent-100/70 blur-3xl"
         />
         <div className="container-page relative grid items-center gap-10 py-14 sm:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-24">
           <div className="animate-fade-up">
@@ -84,7 +84,7 @@ export function HomePage() {
             </div>
 
             <p className="mt-6 flex items-start gap-2 text-sm text-muted">
-              <Lock className="mt-0.5 size-4 shrink-0 text-champagne-700" aria-hidden="true" />
+              <Lock className="mt-0.5 size-4 shrink-0 text-accent-700" aria-hidden="true" />
               Your photo is analyzed in your browser and is never uploaded or stored.
             </p>
           </div>
@@ -108,10 +108,10 @@ export function HomePage() {
             <li key={step.title}>
               <Card className="h-full">
                 <div className="flex items-center justify-between">
-                  <span className="grid size-11 place-items-center rounded-full bg-champagne-100 text-champagne-700">
+                  <span className="grid size-11 place-items-center rounded-full bg-accent-100 text-accent-700">
                     <step.icon className="size-5" aria-hidden="true" />
                   </span>
-                  <span className="font-display text-3xl text-champagne-300" aria-hidden="true">
+                  <span className="font-display text-3xl text-accent-300" aria-hidden="true">
                     {index + 1}
                   </span>
                 </div>
@@ -132,7 +132,7 @@ export function HomePage() {
               id="phi-title"
               title={
                 <>
-                  A number worth knowing: <span className="text-champagne-700">φ ≈ 1.618</span>
+                  A number worth knowing: <span className="text-accent-700">φ ≈ 1.618</span>
                 </>
               }
             />
@@ -147,27 +147,27 @@ export function HomePage() {
             </p>
             <Link
               to="/about"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-ink underline decoration-champagne-400 decoration-2 underline-offset-4 hover:decoration-champagne-700"
+              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-ink underline decoration-accent-400 decoration-2 underline-offset-4 hover:decoration-accent-700"
             >
               How the numbers are calculated
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>
 
-          <div className="rounded-panel border border-champagne-200 bg-champagne-50 p-6 sm:p-8">
+          <div className="rounded-panel border border-accent-200 bg-accent-50 p-6 sm:p-8">
             <h3 className="flex items-center gap-2 font-display text-2xl font-medium text-ink">
-              <ShieldCheck className="size-6 text-champagne-700" aria-hidden="true" />
+              <ShieldCheck className="size-6 text-accent-700" aria-hidden="true" />
               What this tool cannot tell you
             </h3>
             <ul className="mt-5 space-y-3.5">
               {LIMITS.map((limit) => (
                 <li key={limit} className="flex gap-3 text-sm leading-relaxed text-ink/80">
-                  <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-champagne-600" />
+                  <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-accent-600" />
                   {limit}
                 </li>
               ))}
             </ul>
-            <p className="mt-6 border-t border-champagne-200 pt-5 text-sm font-medium text-ink">
+            <p className="mt-6 border-t border-accent-200 pt-5 text-sm font-medium text-ink">
               The golden ratio is one geometric reference, not a standard of beauty. Results never rank or rate a face.
             </p>
           </div>
@@ -179,7 +179,7 @@ export function HomePage() {
         <div className="overflow-hidden rounded-panel bg-navy px-6 py-12 text-white sm:px-12 sm:py-16">
           <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-center">
             <div>
-              <p className="text-xs font-semibold tracking-[0.18em] text-champagne-300 uppercase">Privacy by design</p>
+              <p className="text-xs font-semibold tracking-[0.18em] text-accent-300 uppercase">Privacy by design</p>
               <h2
                 id="privacy-title"
                 className="mt-3 font-display text-3xl leading-tight font-medium tracking-tight sm:text-4xl"
@@ -201,7 +201,7 @@ export function HomePage() {
                 { icon: ShieldCheck, title: 'No identification', text: 'No face recognition and no guesses about who you are.' },
               ].map((item) => (
                 <li key={item.title} className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                  <item.icon className="size-5 text-champagne-300" aria-hidden="true" />
+                  <item.icon className="size-5 text-accent-300" aria-hidden="true" />
                   <h3 className="mt-3 text-sm font-semibold">{item.title}</h3>
                   <p className="mt-1 text-sm leading-relaxed text-white/70">{item.text}</p>
                 </li>

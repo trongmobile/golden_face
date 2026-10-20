@@ -306,7 +306,7 @@ export function AnalysisPage() {
     const { photo } = state
     content = (
       <div className="container-page py-10 sm:py-14">
-        <p className="text-xs font-semibold tracking-[0.18em] text-champagne-700 uppercase">Step 2 of 3</p>
+        <p className="text-xs font-semibold tracking-[0.18em] text-accent-700 uppercase">Step 2 of 3</p>
         <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-ink outline-none sm:text-5xl">
           Check your photo
         </h1>
@@ -340,12 +340,12 @@ export function AnalysisPage() {
                 Take a new photo
               </Button>
             </Card>
-            <Card className="bg-champagne-50">
+            <Card className="bg-accent-50">
               <h2 className="text-sm font-semibold text-ink">Quick check</h2>
               <ul className="mt-3 space-y-2.5">
                 {TIPS.map((tip) => (
                   <li key={tip.text} className="flex gap-2.5 text-sm leading-relaxed text-muted">
-                    <tip.icon className="mt-0.5 size-4 shrink-0 text-champagne-700" aria-hidden="true" />
+                    <tip.icon className="mt-0.5 size-4 shrink-0 text-accent-700" aria-hidden="true" />
                     {tip.text}
                   </li>
                 ))}
@@ -359,12 +359,12 @@ export function AnalysisPage() {
     const cameraProblem = checkCameraSupport()
     content = (
       <div className="container-page py-10 sm:py-14">
-        <p className="text-xs font-semibold tracking-[0.18em] text-champagne-700 uppercase">Analysis</p>
+        <p className="text-xs font-semibold tracking-[0.18em] text-accent-700 uppercase">Analysis</p>
         <h1 className="mt-2 font-display text-4xl font-medium tracking-tight text-ink sm:text-5xl">
           Analyze a photo
         </h1>
         <p className="mt-3 flex max-w-2xl items-start gap-2 text-muted">
-          <Lock className="mt-1 size-4 shrink-0 text-champagne-700" aria-hidden="true" />
+          <Lock className="mt-1 size-4 shrink-0 text-accent-700" aria-hidden="true" />
           Choose a front-facing portrait. It is analyzed in your browser and never uploaded.
         </p>
 
@@ -383,7 +383,7 @@ export function AnalysisPage() {
           />
           <div className="space-y-6">
             <Card>
-              <span className="grid size-11 place-items-center rounded-full bg-champagne-100 text-champagne-700">
+              <span className="grid size-11 place-items-center rounded-full bg-accent-100 text-accent-700">
                 <Camera className="size-5" aria-hidden="true" />
               </span>
               <h2 className="mt-4 font-display text-2xl font-medium text-ink">Take a photo</h2>
@@ -401,12 +401,12 @@ export function AnalysisPage() {
               )}
             </Card>
 
-            <Card className="bg-champagne-50">
+            <Card className="bg-accent-50">
               <h2 className="text-sm font-semibold text-ink">For the steadiest measurements</h2>
               <ul className="mt-3 space-y-2.5">
                 {TIPS.map((tip) => (
                   <li key={tip.text} className="flex gap-2.5 text-sm leading-relaxed text-muted">
-                    <tip.icon className="mt-0.5 size-4 shrink-0 text-champagne-700" aria-hidden="true" />
+                    <tip.icon className="mt-0.5 size-4 shrink-0 text-accent-700" aria-hidden="true" />
                     {tip.text}
                   </li>
                 ))}

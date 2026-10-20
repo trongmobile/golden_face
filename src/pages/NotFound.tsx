@@ -6,7 +6,7 @@ export function NotFoundPage() {
   usePageMeta('Page not found — GoldenFace')
   return (
     <section className="container-page py-24 text-center" aria-labelledby="nf-title">
-      <p className="font-display text-7xl text-champagne-700" aria-hidden="true">
+      <p className="font-display text-7xl text-accent-700" aria-hidden="true">
         404
       </p>
       <h1 id="nf-title" className="mt-4 font-display text-3xl font-medium text-ink">

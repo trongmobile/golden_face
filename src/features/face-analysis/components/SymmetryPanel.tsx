@@ -22,7 +22,7 @@ export function SymmetryPanel({ symmetry, quality }: { symmetry: SymmetryReport;
           { label: 'Largest left–right difference', value: symmetry.maxHorizontalDeviationPct, hint: 'single feature pair' },
           { label: 'Average height difference', value: symmetry.meanVerticalOffsetPct, hint: '% of face width' },
         ].map((item) => (
-          <div key={item.label} className="rounded-2xl bg-champagne-50 p-4">
+          <div key={item.label} className="rounded-2xl bg-accent-50 p-4">
             <dt className="text-xs text-muted">{item.label}</dt>
             <dd className="mt-1 font-display text-3xl font-medium text-ink tabular-nums">
               {item.value === null ? '—' : formatPercent(item.value)}
