@@ -34,6 +34,7 @@ export const layout: typeof en = {
     goodToKnow: 'Cần lưu ý',
     goodToKnowText:
       'Kết quả đến từ một ảnh 2D duy nhất và bị ảnh hưởng bởi góc chụp, ống kính, ánh sáng và biểu cảm. Chỉ phân tích ảnh của chính bạn hoặc của người đã đồng ý.',
-    copyright: '© {year} GoldenFace. Điểm mốc khuôn mặt do Google MediaPipe cung cấp. Dịch vụ được cung cấp “nguyên trạng”, không kèm bảo hành.',
+    aiNote: 'Trang web này được tạo hoàn toàn bởi AI.',
+    copyright:'© {year} GoldenFace. Điểm mốc khuôn mặt do Google MediaPipe cung cấp. Dịch vụ được cung cấp “nguyên trạng”, không kèm bảo hành.',
   },
 }

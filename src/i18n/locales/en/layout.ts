@@ -32,6 +32,7 @@ export const layout = {
     goodToKnow: 'Good to know',
     goodToKnowText:
       'Results come from a single 2D photo and are affected by angle, lens, lighting and expression. Only analyze photos of yourself or of people who have agreed to it.',
-    copyright: '© {year} GoldenFace. Facial landmarks by Google MediaPipe. Provided “as is”, without warranty.',
+    aiNote: 'This website was created entirely by AI.',
+    copyright:'© {year} GoldenFace. Facial landmarks by Google MediaPipe. Provided “as is”, without warranty.',
   },
 }

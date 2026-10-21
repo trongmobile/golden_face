@@ -1,0 +1,395 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Demo avatar</title>
+<style>
+  html, body { margin: 0; background: #888; }
+  canvas { display: block; }
+</style>
+<canvas id="c" width="1000" height="1300"></canvas>
+<script>
+  // A fully synthetic, illustrated portrait used only as the demo "person" in the tutorial video,
+  // so that no real person's photo is ever analysed in public material.
+  const c = document.getElementById('c')
+  const g = c.getContext('2d')
+  const W = 1000
+  const H = 1300
+  const CX = 500
+
+  const blurred = (px, fn) => {
+    g.save()
+    g.filter = `blur(${px}px)`
+    fn()
+    g.restore()
+  }
+  const grad = (x0, y0, x1, y1, stops) => {
+    const gr = g.createLinearGradient(x0, y0, x1, y1)
+    stops.forEach(([o, col]) => gr.addColorStop(o, col))
+    return gr
+  }
+  const radial = (x, y, r0, r1, stops, sx = 1, sy = 1) => {
+    const gr = g.createRadialGradient(0, 0, r0, 0, 0, r1)
+    stops.forEach(([o, col]) => gr.addColorStop(o, col))
+    return { gr, x, y, sx, sy }
+  }
+  const fillRadial = (spec, pathFn) => {
+    g.save()
+    g.translate(spec.x, spec.y)
+    g.scale(spec.sx, spec.sy)
+    g.fillStyle = spec.gr
+    g.beginPath()
+    pathFn()
+    g.fill()
+    g.restore()
+  }
+
+  // ---- background: soft studio backdrop -------------------------------------------------
+  g.fillStyle = grad(0, 0, W, H, [[0, '#9fb3bd'], [1, '#6f8794']])
+  g.fillRect(0, 0, W, H)
+  blurred(60, () => {
+    g.fillStyle = 'rgba(255,255,255,0.35)'
+    g.beginPath()
+    g.ellipse(CX, 520, 330, 420, 0, 0, Math.PI * 2)
+    g.fill()
+  })
+
+  // ---- shoulders + shirt ----------------------------------------------------------------
+  g.fillStyle = grad(0, 1050, 0, H, [[0, '#2b3a4a'], [1, '#1c2733']])
+  g.beginPath()
+  g.moveTo(-20, H)
+  g.bezierCurveTo(-10, 1150, 120, 1100, 330, 1075)
+  g.lineTo(670, 1075)
+  g.bezierCurveTo(880, 1100, 1010, 1150, 1020, H)
+  g.closePath()
+  g.fill()
+
+  // ---- neck -----------------------------------------------------------------------------
+  g.fillStyle = grad(0, 930, 0, 1130, [[0, '#c99874'], [1, '#b98763']])
+  g.beginPath()
+  g.moveTo(385, 900)
+  g.bezierCurveTo(390, 1010, 380, 1070, 330, 1100)
+  g.lineTo(670, 1100)
+  g.bezierCurveTo(620, 1070, 610, 1010, 615, 900)
+  g.closePath()
+  g.fill()
+  // shirt collar over the neck
+  g.fillStyle = '#e9edf0'
+  g.beginPath()
+  g.moveTo(385, 1048)
+  g.lineTo(500, 1135)
+  g.lineTo(615, 1048)
+  g.lineTo(675, 1085)
+  g.lineTo(500, 1230)
+  g.lineTo(325, 1085)
+  g.closePath()
+  g.fill()
+  blurred(14, () => {
+    g.fillStyle = 'rgba(70,40,25,0.55)'
+    g.beginPath()
+    g.ellipse(CX, 1000, 120, 70, 0, 0, Math.PI * 2)
+    g.fill()
+  })
+
+  // ---- hair (back) ----------------------------------------------------------------------
+  g.fillStyle = '#1c1613'
+  g.beginPath()
+  g.moveTo(228, 640)
+  g.bezierCurveTo(190, 430, 250, 200, 500, 185)
+  g.bezierCurveTo(750, 200, 812, 430, 772, 640)
+  g.closePath()
+  g.fill()
+
+  // ---- ears -----------------------------------------------------------------------------
+  const ear = (side) => {
+    const x = CX + side * 262
+    fillRadial(radial(x, 640, 5, 95, [[0, '#dca986'], [1, '#bf8d68']], 0.55, 1), () => g.arc(0, 0, 95, 0, Math.PI * 2))
+    g.strokeStyle = 'rgba(120,70,45,0.55)'
+    g.lineWidth = 5
+    g.beginPath()
+    g.ellipse(x + side * 2, 640, 20, 52, 0, 0, Math.PI * 2)
+    g.stroke()
+  }
+  ear(-1)
+  ear(1)
+
+  // ---- head / face ----------------------------------------------------------------------
+  const facePath = () => {
+    g.moveTo(CX, 250)
+    g.bezierCurveTo(CX + 190, 250, CX + 262, 400, CX + 258, 590)
+    g.bezierCurveTo(CX + 256, 760, CX + 215, 900, CX + 130, 975)
+    g.bezierCurveTo(CX + 85, 1015, CX + 40, 1030, CX, 1032)
+    g.bezierCurveTo(CX - 40, 1030, CX - 85, 1015, CX - 130, 975)
+    g.bezierCurveTo(CX - 215, 900, CX - 256, 760, CX - 258, 590)
+    g.bezierCurveTo(CX - 262, 400, CX - 190, 250, CX, 250)
+    g.closePath()
+  }
+  g.fillStyle = grad(240, 0, 760, 0, [[0, '#cf9d79'], [0.28, '#e6bb98'], [0.7, '#e9c19e'], [1, '#c99874']])
+  g.beginPath()
+  facePath()
+  g.fill()
+
+  g.save()
+  g.beginPath()
+  facePath()
+  g.clip()
+  // forehead highlight, cheek warmth, jaw/temple shading
+  blurred(40, () => {
+    g.fillStyle = 'rgba(255,236,214,0.55)'
+    g.beginPath()
+    g.ellipse(CX, 430, 120, 80, 0, 0, Math.PI * 2)
+    g.fill()
+    g.fillStyle = 'rgba(214,120,100,0.28)'
+    g.beginPath()
+    g.ellipse(CX - 150, 760, 70, 55, 0, 0, Math.PI * 2)
+    g.ellipse(CX + 150, 760, 70, 55, 0, 0, Math.PI * 2)
+    g.fill()
+    g.fillStyle = 'rgba(110,65,40,0.38)'
+    g.beginPath()
+    g.ellipse(CX - 250, 800, 40, 220, 0, 0, Math.PI * 2)
+    g.ellipse(CX + 250, 800, 40, 220, 0, 0, Math.PI * 2)
+    g.fill()
+    g.fillStyle = 'rgba(110,65,40,0.30)'
+    g.beginPath()
+    g.ellipse(CX, 1040, 170, 36, 0, 0, Math.PI * 2)
+    g.fill()
+  })
+  g.restore()
+
+  // ---- eyes -----------------------------------------------------------------------------
+  const eye = (side) => {
+    const x = CX + side * 108
+    const y = 585
+    // socket shadow
+    blurred(9, () => {
+      g.fillStyle = 'rgba(120,70,50,0.35)'
+      g.beginPath()
+      g.ellipse(x, y - 4, 74, 40, 0, 0, Math.PI * 2)
+      g.fill()
+    })
+    const almond = () => {
+      g.moveTo(x - 58, y + 4)
+      g.bezierCurveTo(x - 30, y - 34, x + 30, y - 34, x + 58, y + 2)
+      g.bezierCurveTo(x + 30, y + 24, x - 30, y + 26, x - 58, y + 4)
+      g.closePath()
+    }
+    g.save()
+    g.beginPath()
+    almond()
+    g.clip()
+    g.fillStyle = '#f3efe9'
+    g.fillRect(x - 70, y - 40, 140, 80)
+    // iris
+    const ir = g.createRadialGradient(x, y - 2, 4, x, y - 2, 26)
+    ir.addColorStop(0, '#2a170c')
+    ir.addColorStop(0.45, '#6b4426')
+    ir.addColorStop(1, '#2b1a10')
+    g.fillStyle = ir
+    g.beginPath()
+    g.arc(x, y - 1, 25, 0, Math.PI * 2)
+    g.fill()
+    g.fillStyle = '#0b0705'
+    g.beginPath()
+    g.arc(x, y - 1, 11, 0, Math.PI * 2)
+    g.fill()
+    g.fillStyle = 'rgba(255,255,255,0.9)'
+    g.beginPath()
+    g.arc(x - 8 + side * -1, y - 9, 5, 0, Math.PI * 2)
+    g.fill()
+    // upper-lid shadow
+    g.fillStyle = grad(0, y - 36, 0, y - 6, [[0, 'rgba(60,35,25,0.55)'], [1, 'rgba(60,35,25,0)']])
+    g.fillRect(x - 70, y - 40, 140, 36)
+    g.restore()
+    // lash line + lid crease
+    g.strokeStyle = '#1b110d'
+    g.lineWidth = 7
+    g.lineCap = 'round'
+    g.beginPath()
+    g.moveTo(x - 58, y + 4)
+    g.bezierCurveTo(x - 30, y - 34, x + 30, y - 34, x + 58, y + 2)
+    g.stroke()
+    g.strokeStyle = 'rgba(110,65,45,0.75)'
+    g.lineWidth = 3.5
+    g.beginPath()
+    g.moveTo(x - 52, y - 12)
+    g.bezierCurveTo(x - 25, y - 50, x + 25, y - 50, x + 54, y - 14)
+    g.stroke()
+    g.strokeStyle = 'rgba(120,70,50,0.45)'
+    g.lineWidth = 3
+    g.beginPath()
+    g.moveTo(x - 50, y + 22)
+    g.bezierCurveTo(x - 20, y + 36, x + 20, y + 36, x + 50, y + 20)
+    g.stroke()
+  }
+  eye(-1)
+  eye(1)
+
+  // ---- eyebrows -------------------------------------------------------------------------
+  const brow = (side) => {
+    const x = CX + side * 112
+    g.save()
+    g.translate(x, 512)
+    g.scale(side, 1)
+    g.fillStyle = '#231a15'
+    g.beginPath()
+    g.moveTo(-62, 14)
+    g.bezierCurveTo(-34, -20, 28, -26, 72, -4)
+    g.bezierCurveTo(32, -10, -26, -2, -62, 22)
+    g.closePath()
+    g.fill()
+    g.lineWidth = 2
+    g.strokeStyle = 'rgba(35,26,21,0.7)'
+    for (let i = 0; i < 26; i++) {
+      const t = i / 26
+      const bx = -60 + t * 130
+      const by = 14 - Math.sin(t * Math.PI) * 26 + t * -14
+      g.beginPath()
+      g.moveTo(bx, by + 9)
+      g.lineTo(bx + 9, by - 3)
+      g.stroke()
+    }
+    g.restore()
+  }
+  brow(-1)
+  brow(1)
+
+  // ---- nose -----------------------------------------------------------------------------
+  blurred(10, () => {
+    g.fillStyle = 'rgba(140,85,60,0.30)'
+    g.beginPath()
+    g.ellipse(CX - 38, 660, 14, 90, 0.08, 0, Math.PI * 2)
+    g.ellipse(CX + 38, 660, 14, 90, -0.08, 0, Math.PI * 2)
+    g.fill()
+    g.fillStyle = 'rgba(100,55,40,0.40)'
+    g.beginPath()
+    g.ellipse(CX, 780, 62, 17, 0, 0, Math.PI * 2)
+    g.fill()
+    g.fillStyle = 'rgba(255,238,220,0.55)'
+    g.beginPath()
+    g.ellipse(CX, 690, 14, 70, 0, 0, Math.PI * 2)
+    g.ellipse(CX, 748, 24, 20, 0, 0, Math.PI * 2)
+    g.fill()
+  })
+  g.fillStyle = 'rgba(70,35,25,0.78)'
+  g.beginPath()
+  g.ellipse(CX - 26, 765, 13, 7, -0.25, 0, Math.PI * 2)
+  g.ellipse(CX + 26, 765, 13, 7, 0.25, 0, Math.PI * 2)
+  g.fill()
+  g.strokeStyle = 'rgba(120,70,50,0.55)'
+  g.lineWidth = 4
+  g.lineCap = 'round'
+  g.beginPath()
+  g.moveTo(CX - 62, 748)
+  g.bezierCurveTo(CX - 66, 770, CX - 50, 780, CX - 32, 782)
+  g.moveTo(CX + 62, 748)
+  g.bezierCurveTo(CX + 66, 770, CX + 50, 780, CX + 32, 782)
+  g.stroke()
+
+  // ---- philtrum + mouth (closed, relaxed) ------------------------------------------------
+  blurred(6, () => {
+    g.fillStyle = 'rgba(120,70,50,0.25)'
+    g.beginPath()
+    g.ellipse(CX - 14, 815, 6, 22, 0, 0, Math.PI * 2)
+    g.ellipse(CX + 14, 815, 6, 22, 0, 0, Math.PI * 2)
+    g.fill()
+  })
+  const upper = () => {
+    g.moveTo(CX - 84, 862)
+    g.bezierCurveTo(CX - 55, 842, CX - 28, 836, CX, 846)
+    g.bezierCurveTo(CX + 28, 836, CX + 55, 842, CX + 84, 862)
+    g.bezierCurveTo(CX + 40, 868, CX - 40, 868, CX - 84, 862)
+    g.closePath()
+  }
+  const lower = () => {
+    g.moveTo(CX - 84, 862)
+    g.bezierCurveTo(CX - 40, 868, CX + 40, 868, CX + 84, 862)
+    g.bezierCurveTo(CX + 62, 912, CX + 30, 922, CX, 922)
+    g.bezierCurveTo(CX - 30, 922, CX - 62, 912, CX - 84, 862)
+    g.closePath()
+  }
+  g.fillStyle = grad(0, 836, 0, 870, [[0, '#b86a5e'], [1, '#a65a50']])
+  g.beginPath()
+  upper()
+  g.fill()
+  g.fillStyle = grad(0, 862, 0, 922, [[0, '#c27468'], [0.6, '#cc8174'], [1, '#bd7468']])
+  g.beginPath()
+  lower()
+  g.fill()
+  blurred(3, () => {
+    g.fillStyle = 'rgba(255,225,215,0.55)'
+    g.beginPath()
+    g.ellipse(CX - 4, 893, 26, 6, 0, 0, Math.PI * 2)
+    g.fill()
+  })
+  g.strokeStyle = '#6d3a34'
+  g.lineWidth = 4
+  g.lineCap = 'round'
+  g.beginPath()
+  g.moveTo(CX - 86, 862)
+  g.bezierCurveTo(CX - 40, 870, CX + 40, 870, CX + 86, 862)
+  g.stroke()
+  // chin shade under the lip
+  blurred(10, () => {
+    g.fillStyle = 'rgba(120,70,50,0.28)'
+    g.beginPath()
+    g.ellipse(CX, 944, 46, 12, 0, 0, Math.PI * 2)
+    g.fill()
+  })
+
+  // ---- hair (front) ---------------------------------------------------------------------
+  g.fillStyle = '#1c1613'
+  g.beginPath()
+  g.moveTo(236, 560)
+  g.bezierCurveTo(205, 380, 255, 215, 500, 195)
+  g.bezierCurveTo(745, 215, 795, 380, 764, 560)
+  g.bezierCurveTo(752, 470, 735, 410, 700, 365)
+  g.bezierCurveTo(640, 335, 580, 318, 500, 318)
+  g.bezierCurveTo(420, 318, 360, 335, 300, 365)
+  g.bezierCurveTo(265, 410, 248, 470, 236, 560)
+  g.closePath()
+  g.fill()
+  // hair texture: strokes sweeping from the parting to the sides, clipped to the hair shape
+  g.save()
+  g.beginPath()
+  g.moveTo(236, 560)
+  g.bezierCurveTo(205, 380, 255, 215, 500, 195)
+  g.bezierCurveTo(745, 215, 795, 380, 764, 560)
+  g.bezierCurveTo(752, 470, 735, 410, 700, 365)
+  g.bezierCurveTo(640, 335, 580, 318, 500, 318)
+  g.bezierCurveTo(420, 318, 360, 335, 300, 365)
+  g.bezierCurveTo(265, 410, 248, 470, 236, 560)
+  g.closePath()
+  g.clip()
+  g.lineWidth = 2.4
+  g.lineCap = 'round'
+  for (let i = 0; i < 260; i++) {
+    const t = i / 260
+    const side = i % 2 ? 1 : -1
+    const x0 = CX + side * (10 + t * 250)
+    const y0 = 215 + Math.pow(t, 0.6) * 150
+    const tone = 40 + (i % 5) * 9
+    g.strokeStyle = `rgba(${tone + 8},${tone},${tone - 4},0.55)`
+    g.beginPath()
+    g.moveTo(x0, y0)
+    g.quadraticCurveTo(x0 + side * 40, y0 + 30, x0 + side * (60 + t * 30), y0 + 150 + t * 120)
+    g.stroke()
+  }
+  g.restore()
+  blurred(8, () => {
+    g.fillStyle = 'rgba(0,0,0,0.30)'
+    g.beginPath()
+    g.ellipse(CX, 340, 240, 22, 0, 0, Math.PI * 2)
+    g.fill()
+  })
+
+  // ---- fine grain so the vector fills look photographic -----------------------------------
+  const img = g.getImageData(0, 0, W, H)
+  let seed = 7
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
+  for (let i = 0; i < img.data.length; i += 4) {
+    const n = (rnd() - 0.5) * 9
+    img.data[i] += n
+    img.data[i + 1] += n
+    img.data[i + 2] += n
+  }
+  g.putImageData(img, 0, 0)
+  window.__done = true
+</script>

@@ -18,3 +18,7 @@ e2e/.fixtures/
 .vscode/*
 !.vscode/extensions.json
 .idea
+
+# TikTok promo video (promo/record.mjs): rendered output and scratch frames
+promo/out/
+promo/.work/

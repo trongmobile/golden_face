@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>GoldenFace — explainer stage</title>
+  <link rel="stylesheet" href="/fonts/inter/index.css" />
+  <link rel="stylesheet" href="/fonts/fraunces/index.css" />
+  <style>
+    :root { --cream: #f6f1e7; --ink: #12263a; --gold: #c8932a; --gold-soft: #f0d9a4; --teal: #1b6b63; --muted: #5b6b78; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--cream); }
+    body { position: relative; font-family: 'Inter Variable', system-ui, sans-serif; color: var(--ink); }
+    .serif { font-family: 'Fraunces Variable', Georgia, serif; }
+    em { font-style: normal; color: var(--gold); }
+
+    #grain { position: absolute; inset: 0; background:
+      radial-gradient(800px 800px at 100% 0%, rgba(200,147,42,0.16), transparent 70%),
+      radial-gradient(900px 700px at 0% 100%, rgba(27,107,99,0.12), transparent 70%); }
+
+    .scene { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0s 0.4s; }
+    .scene.on { opacity: 1; visibility: visible; transition: opacity 0.4s ease; }
+    .pill { display: inline-block; font-weight: 700; font-size: 30px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ink); background: var(--gold-soft); padding: 10px 26px; border-radius: 999px; }
+    .tag { position: absolute; left: 0; right: 0; text-align: center; font-size: 26px; font-weight: 600; color: var(--muted); }
+
+    @keyframes rise { from { opacity: 0; transform: translateY(46px); } to { opacity: 1; transform: none; } }
+    @keyframes pop { from { opacity: 0; transform: scale(0.82); } to { opacity: 1; transform: none; } }
+    @keyframes slide { from { opacity: 0; transform: translateX(160px); } to { opacity: 1; transform: none; } }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+
+    /* ---- 1. hook ---- */
+    #hook .pill { position: absolute; left: 72px; top: 200px; }
+    #hook .num { position: absolute; left: 0; right: 0; top: 640px; text-align: center; font-size: 330px; font-weight: 600; line-height: 1; letter-spacing: -0.03em; }
+    #hook .sub { position: absolute; left: 90px; right: 90px; top: 1040px; text-align: center; font-size: 66px; line-height: 1.15; font-weight: 650; }
+    #hook .small { position: absolute; left: 110px; right: 110px; top: 1290px; text-align: center; font-size: 40px; line-height: 1.35; color: var(--muted); font-weight: 500; }
+    #hook svg { position: absolute; left: 0; top: 0; }
+
+    /* ---- 2. ratios on the face ---- */
+    #ratios .head { position: absolute; left: 72px; right: 72px; top: 150px; }
+    #ratios h2 { margin: 18px 0 0; font-size: 64px; line-height: 1.08; font-weight: 650; }
+    #ratios .photo { position: absolute; left: 230px; top: 400px; width: 620px; height: 806px; border-radius: 40px; overflow: hidden;
+      box-shadow: 0 30px 70px rgba(18,38,58,0.28); }
+    #ratios .photo img { width: 100%; height: 100%; display: block; }
+    #ratios .photo svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #ratios .ln { stroke-width: 7; stroke-linecap: round; fill: none; stroke-dasharray: 1200; stroke-dashoffset: 1200; }
+    #ratios .l1 { stroke: #e8a317; } #ratios .l2 { stroke: #ffffff; } #ratios .l3 { stroke: #35c2b0; }
+    #ratios.r1 .l1, #ratios.r2 .l2, #ratios.r3 .l3 { animation: draw 0.9s ease-out forwards; }
+    #ratios .rows { position: absolute; left: 72px; right: 72px; top: 1236px; display: flex; flex-direction: column; gap: 14px; }
+    #ratios .row { display: flex; align-items: center; gap: 22px; background: #fff; border-radius: 26px; padding: 16px 26px;
+      font-size: 36px; font-weight: 600; opacity: 0.0; transform: translateY(30px); transition: all 0.5s ease; box-shadow: 0 6px 20px rgba(18,38,58,0.08); }
+    #ratios .row i { width: 22px; height: 22px; border-radius: 50%; flex: none; }
+    #ratios .row b { margin-left: auto; font-family: 'Fraunces Variable', serif; font-size: 40px; color: var(--gold); }
+    #ratios.r1 .row:nth-child(1), #ratios.r2 .row:nth-child(2), #ratios.r3 .row:nth-child(3) { opacity: 1; transform: none; }
+    #ratios.r2 .row:nth-child(1), #ratios.r3 .row:nth-child(1), #ratios.r3 .row:nth-child(2) { opacity: 1; transform: none; }
+    #ratios .tag { top: 1850px; }
+
+    /* ---- 3. steps ---- */
+    #steps .head { position: absolute; left: 72px; top: 150px; }
+    #steps h2 { margin: 18px 0 0; font-size: 84px; line-height: 1.04; font-weight: 650; }
+    #steps .card { position: absolute; left: 72px; right: 72px; height: 330px; background: #fff; border-radius: 44px; padding: 38px 44px;
+      display: flex; align-items: center; gap: 34px; box-shadow: 0 18px 50px rgba(18,38,58,0.12); opacity: 0; }
+    #steps .c1 { top: 430px; } #steps .c2 { top: 790px; } #steps .c3 { top: 1150px; }
+    #steps.s1 .c1, #steps.s2 .c2, #steps.s3 .c3 { animation: slide 0.6s cubic-bezier(.2,.8,.2,1) both; }
+    #steps.s2 .c1, #steps.s3 .c1, #steps.s3 .c2 { opacity: 1; }
+    #steps .n { flex: none; width: 96px; height: 96px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center;
+      font-family: 'Fraunces Variable', serif; font-size: 58px; font-weight: 650; }
+    #steps .t { flex: 1; font-size: 50px; line-height: 1.1; font-weight: 700; }
+    #steps .t small { display: block; margin-top: 12px; font-size: 30px; line-height: 1.3; font-weight: 500; color: var(--muted); }
+    #steps .th { flex: none; width: 300px; height: 252px; border-radius: 26px; overflow: hidden; background: #e9eef1; }
+    #steps .th img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+
+    /* ---- 4. real result ---- */
+    #result .head { position: absolute; left: 72px; right: 72px; top: 150px; }
+    #result h2 { margin: 18px 0 0; font-size: 70px; line-height: 1.06; font-weight: 650; }
+    #result .big { position: absolute; left: 150px; top: 440px; width: 780px; border-radius: 40px; box-shadow: 0 30px 70px rgba(18,38,58,0.3); display: block; }
+    #result .card { position: absolute; left: 330px; top: 1030px; width: 680px; border-radius: 34px; box-shadow: 0 26px 60px rgba(18,38,58,0.34); border: 6px solid #fff; display: block; }
+    #result.on .big { animation: rise 0.8s ease 0.1s both; }
+    #result.on .card { animation: pop 0.7s cubic-bezier(.2,.8,.2,1) 1.6s both; }
+    #result .tag { top: 1850px; }
+
+    /* ---- 5. trust ---- */
+    #trust .item { position: absolute; left: 72px; right: 72px; height: 500px; border-radius: 52px; padding: 52px 56px; color: #fff; }
+    #trust .a { top: 300px; background: var(--ink); } #trust .b { top: 840px; background: var(--teal); }
+    #trust .item svg { width: 120px; height: 120px; }
+    #trust .item h3 { margin: 22px 0 0; font-size: 60px; line-height: 1.05; font-weight: 650; font-family: 'Fraunces Variable', serif; }
+    #trust .item p { margin: 14px 0 0; font-size: 34px; line-height: 1.3; font-weight: 500; opacity: 0.86; }
+    #trust.on .a { animation: slide 0.6s cubic-bezier(.2,.8,.2,1) 0.1s both; }
+    #trust .b { opacity: 0; }
+    #trust.t2 .b { animation: slide 0.6s cubic-bezier(.2,.8,.2,1) both; }
+
+    /* ---- 6. cta ---- */
+    #cta { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 36px; text-align: center; padding: 0 90px 160px; }
+    #cta img { width: 200px; height: 200px; border-radius: 50px; box-shadow: 0 24px 60px rgba(18,38,58,0.3); }
+    #cta h2 { margin: 0; font-size: 120px; font-weight: 650; letter-spacing: -0.02em; } #cta h2 span { color: var(--teal); }
+    #cta p { margin: 0; font-size: 50px; line-height: 1.25; font-weight: 600; }
+    #cta .btn { font-size: 56px; font-weight: 800; color: #fff; background: var(--ink); padding: 28px 64px; border-radius: 999px; }
+    #cta .url { font-size: 34px; color: var(--muted); font-weight: 500; }
+    #cta.on img, #cta.on h2, #cta.on p, #cta.on .btn, #cta.on .url { animation: rise 0.6s ease both; }
+    #cta.on h2 { animation-delay: 0.1s; } #cta.on p { animation-delay: 0.25s; } #cta.on .btn { animation-delay: 0.45s; } #cta.on .url { animation-delay: 0.6s; }
+  </style>
+</head>
+<body>
+  <div id="grain"></div>
+
+  <section class="scene" id="hook">
+    <svg width="1080" height="1920" viewBox="0 0 1080 1920"><path class="spiral" d="" fill="none" stroke="rgba(200,147,42,0.55)" stroke-width="7" stroke-linecap="round"/></svg>
+    <div class="pill">Bạn có biết?</div>
+    <div class="num serif" id="num">1.000</div>
+    <div class="sub serif">Tỷ lệ vàng <em>ẩn</em> trong khuôn mặt?</div>
+    <div class="small">Thử đo xem mặt bạn gần con số này đến đâu.</div>
+  </section>
+
+  <section class="scene" id="ratios">
+    <div class="head"><span class="pill">3 tỷ lệ được so với φ</span><h2 class="serif">Đo ngay <em>trên khuôn mặt</em></h2></div>
+    <div class="photo">
+      <img src="/avatar.jpg" alt="" />
+      <svg viewBox="0 0 1000 1300">
+        <path class="ln l1" d="M815 330 V1032 M760 330 H870 M760 1032 H870 M242 700 H758"/>
+        <path class="ln l2" d="M438 775 H562 M418 866 H582"/>
+        <path class="ln l3" d="M640 846 V862 M640 862 V922 M610 846 H670 M610 922 H670"/>
+      </svg>
+    </div>
+    <div class="rows">
+      <div class="row"><i style="background:#e8a317"></i>Chiều dài ÷ chiều rộng mặt<b>φ?</b></div>
+      <div class="row"><i style="background:#9aa7b0"></i>Rộng miệng ÷ rộng mũi<b>φ?</b></div>
+      <div class="row"><i style="background:#35c2b0"></i>Môi dưới ÷ môi trên<b>φ?</b></div>
+    </div>
+    <div class="tag">Minh họa trên avatar vẽ sẵn, không phải người thật</div>
+  </section>
+
+  <section class="scene" id="steps">
+    <div class="head"><span class="pill">Cách dùng</span><h2 class="serif">Chỉ <em>3 bước</em>,<br />30 giây</h2></div>
+    <div class="card c1"><div class="n">1</div><div class="t">Tải ảnh lên<small>hoặc chụp bằng camera</small></div><div class="th"><img src="/shots/upload.png" alt="" /></div></div>
+    <div class="card c2"><div class="n">2</div><div class="t">Bấm Phân tích<small>cắt ảnh quanh khuôn mặt trước</small></div><div class="th"><img src="/shots/edit.png" alt="" /></div></div>
+    <div class="card c3"><div class="n">3</div><div class="t">Xem kết quả<small>số đo vẽ ngay trên ảnh</small></div><div class="th"><img src="/shots/result.png" alt="" /></div></div>
+  </section>
+
+  <section class="scene" id="result">
+    <div class="head"><span class="pill">Kết quả thật từ app</span><h2 class="serif">Mỗi tỷ lệ có <em>công thức</em> và độ gần φ</h2></div>
+    <img class="big" src="/shots/result.png" alt="" />
+    <img class="card" src="/shots/card.png" alt="" />
+    <div class="tag">Ảnh demo: avatar vẽ sẵn, không phải người thật</div>
+  </section>
+
+  <section class="scene" id="trust">
+    <div class="item a">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#e8c36a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+      <h3>Ảnh ở lại trong máy bạn</h3><p>Phân tích ngay trong trình duyệt. Không có máy chủ nào nhận ảnh.</p>
+    </div>
+    <div class="item b">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>
+      <h3>Không chấm điểm nhan sắc</h3><p>Tỷ lệ vàng chỉ là một điểm tham chiếu hình học, vui là chính.</p>
+    </div>
+  </section>
+
+  <section class="scene" id="cta">
+    <img src="/favicon.svg" alt="" />
+    <h2 class="serif">Golden<span>Face</span></h2>
+    <p>Đo tỷ lệ vàng khuôn mặt<br />miễn phí, ngay trên trình duyệt</p>
+    <div class="btn">Link ở bio</div>
+    <div class="url" id="url"></div>
+  </section>
+
+  <script>
+    {
+      const PHI = (1 + Math.sqrt(5)) / 2
+      const pts = []
+      for (let th = -1.4 * Math.PI; th < 3.6 * Math.PI; th += 0.04) {
+        const r = 22 * Math.pow(PHI, (2 * th) / Math.PI)
+        pts.push([700 + r * Math.cos(th), 790 - r * Math.sin(th)])
+      }
+      document.querySelector('#hook .spiral').setAttribute('d', pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' '))
+    }
+    const $ = (id) => document.getElementById(id)
+    let counter
+    window.ex = {
+      show(id) {
+        document.querySelectorAll('.scene').forEach((s) => {
+          if (s.id !== id) { s.classList.remove('on'); }
+        })
+        const el = $(id)
+        el.className = 'scene'
+        void el.offsetWidth
+        el.classList.add('on')
+        clearInterval(counter)
+      },
+      // 1.000 → 1.618 (ease-in-out, 5.4 s); everything else on the hook scene is already in place on frame 0
+      count() {
+        clearInterval(counter)
+        const t0 = performance.now()
+        counter = setInterval(() => {
+          const t = Math.min(1, (performance.now() - t0) / 5400)
+          $('num').textContent = (1 + 0.618 * (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2)).toFixed(3)
+          if (t >= 1) { $('num').textContent = '1.618'; clearInterval(counter) }
+        }, 16)
+      },
+      mark(id, cls) { $(id).classList.add(cls) },
+      url(text) { $('url').textContent = text },
+    }
+  </script>
+</body>
+</html>

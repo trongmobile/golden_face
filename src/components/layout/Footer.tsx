@@ -52,9 +52,10 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-line">
-        <p className="container-page py-5 text-xs text-muted" suppressHydrationWarning>
-          {t('layout.footer.copyright', { year: new Date().getFullYear() })}
-        </p>
+        <div className="container-page flex flex-col gap-1 py-5 text-center text-xs text-muted">
+          <p suppressHydrationWarning>{t('layout.footer.copyright', { year: new Date().getFullYear() })}</p>
+          <p>{t('layout.footer.aiNote')}</p>
+        </div>
       </div>
     </footer>
   )

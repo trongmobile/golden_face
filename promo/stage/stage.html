@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>GoldenFace — TikTok stage</title>
+  <link rel="stylesheet" href="/fonts/inter/index.css" />
+  <link rel="stylesheet" href="/fonts/fraunces/index.css" />
+  <style>
+    :root {
+      --navy: #12263a;
+      --navy-deep: #0b1826;
+      --teal: #7fc6bf;
+      --gold: #e8bd55;
+      --ink: #f4f7f9;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--navy-deep); }
+    body { position: relative; font-family: 'Inter Variable', system-ui, sans-serif; color: var(--ink); }
+
+    /* ---- backdrop ---- */
+    #bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(900px 700px at 90% 8%, rgba(232, 189, 85, 0.20), transparent 70%),
+        radial-gradient(1000px 900px at 5% 95%, rgba(127, 198, 191, 0.16), transparent 70%),
+        linear-gradient(180deg, #0d1d2e 0%, #12263a 55%, #0b1826 100%);
+    }
+    #spiral { position: absolute; inset: 0; opacity: 0.9; }
+
+    /* ---- heading block (TikTok-safe: starts below the top bar, stays above the bottom caption zone) ---- */
+    #heading {
+      position: absolute; left: 72px; right: 72px; top: 124px; height: 316px;
+      display: flex; flex-direction: column; justify-content: center; gap: 16px;
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    #heading.out { opacity: 0; transform: translateY(-14px); }
+    #pill {
+      align-self: flex-start;
+      font-weight: 700; font-size: 30px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: #1a1405; background: var(--gold);
+      padding: 9px 24px; border-radius: 999px;
+    }
+    #title {
+      font-family: 'Fraunces Variable', Georgia, serif; font-weight: 650;
+      font-size: 74px; line-height: 1.06; margin: 0; letter-spacing: -0.01em;
+      text-wrap: balance;
+    }
+    #title em { font-style: normal; color: var(--gold); }
+    #caption {
+      font-size: 39px; line-height: 1.3; font-weight: 500; margin: 0;
+      color: rgba(244, 247, 249, 0.86);
+      text-wrap: pretty;
+    }
+
+    /* ---- phone ---- */
+    #phone {
+      position: absolute; left: 111px; top: 506px; width: 858px; height: 1380px;
+      border-radius: 58px; overflow: hidden; background: #fff;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.16), 0 40px 90px rgba(0, 0, 0, 0.55);
+    }
+    #app {
+      position: absolute; left: 0; top: 0; width: 390px; height: 627px; border: 0;
+      transform: scale(2.2); transform-origin: 0 0; background: #fff;
+    }
+
+    /* ---- overlays ---- */
+    #ring {
+      position: absolute; border: 7px solid var(--gold); border-radius: 30px;
+      box-shadow: 0 0 0 6px rgba(232, 189, 85, 0.25), 0 0 40px rgba(232, 189, 85, 0.55);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    #ring.on { opacity: 1; animation: pulse 1.1s ease-in-out infinite; }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 14px rgba(232, 189, 85, 0.12), 0 0 56px rgba(232, 189, 85, 0.7); } }
+
+    #finger {
+      position: absolute; left: 540px; top: 1500px; width: 84px; height: 84px; margin: -42px 0 0 -42px;
+      border-radius: 50%; background: rgba(255, 255, 255, 0.55);
+      border: 5px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+      opacity: 0; pointer-events: none;
+      transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1), top 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, transform 0.12s ease;
+    }
+    #finger.on { opacity: 1; }
+    #finger.down { transform: scale(0.82); background: rgba(255, 255, 255, 0.8); }
+    #finger.drag { transition: opacity 0.25s ease, transform 0.12s ease; }
+    .ripple {
+      position: absolute; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%;
+      border: 6px solid var(--gold); pointer-events: none; opacity: 0;
+      animation: ripple 0.6s ease-out forwards;
+    }
+    @keyframes ripple { 0% { transform: scale(0.35); opacity: 0.95; } 100% { transform: scale(1.5); opacity: 0; } }
+
+    #demo-tag {
+      position: absolute; left: 50%; top: 450px; transform: translateX(-50%); white-space: nowrap;
+      font-size: 25px; font-weight: 600; color: #fff; background: rgba(11, 24, 38, 0.82);
+      padding: 8px 18px; border-radius: 999px; opacity: 0; transition: opacity 0.3s ease;
+      backdrop-filter: blur(6px);
+    }
+    #demo-tag.on { opacity: 1; }
+
+    /* ---- end card ---- */
+    #end {
+      position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity 0.45s ease;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 34px;
+      padding: 0 90px 200px; text-align: center;
+      background:
+        radial-gradient(900px 700px at 50% 30%, rgba(232, 189, 85, 0.22), transparent 70%),
+        linear-gradient(180deg, #0d1d2e, #12263a 60%, #0b1826);
+    }
+    #end.on { opacity: 1; }
+    #end img { width: 190px; height: 190px; border-radius: 48px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5); }
+    #end h2 { font-family: 'Fraunces Variable', serif; font-weight: 650; font-size: 132px; margin: 0; letter-spacing: -0.02em; }
+    #end h2 span { color: var(--teal); }
+    #end p { font-size: 46px; line-height: 1.3; margin: 0; color: rgba(244, 247, 249, 0.88); font-weight: 500; }
+    #end .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 8px; }
+    #end .chip {
+      font-size: 32px; font-weight: 600; padding: 12px 26px; border-radius: 999px;
+      border: 3px solid rgba(127, 198, 191, 0.7); color: var(--teal);
+    }
+    #end .cta {
+      margin-top: 18px; font-size: 54px; font-weight: 800; color: #1a1405; background: var(--gold);
+      padding: 26px 56px; border-radius: 999px; box-shadow: 0 18px 50px rgba(232, 189, 85, 0.35);
+    }
+    #end .url { font-size: 34px; color: rgba(244, 247, 249, 0.7); font-weight: 500; }
+    #end .fine { font-size: 28px; color: rgba(244, 247, 249, 0.55); max-width: 800px; line-height: 1.35; text-wrap: balance; }
+  </style>
+</head>
+<body>
+  <div id="bg"></div>
+  <svg id="spiral" viewBox="0 0 1080 1920" width="1080" height="1920" aria-hidden="true"></svg>
+
+  <div id="heading">
+    <div id="pill"></div>
+    <h1 id="title"></h1>
+    <p id="caption"></p>
+  </div>
+
+  <div id="phone"><iframe id="app" title="GoldenFace" src="about:blank"></iframe></div>
+  <div id="ring"></div>
+  <div id="demo-tag">Ảnh demo: avatar minh họa, không phải người thật</div>
+  <div id="finger"></div>
+
+  <div id="end">
+    <img src="/favicon.svg" alt="" />
+    <h2>Golden<span>Face</span></h2>
+    <p>Đo tỷ lệ vàng khuôn mặt<br />ngay trên trình duyệt</p>
+    <div class="chips">
+      <div class="chip">Miễn phí</div>
+      <div class="chip">Không cần cài app</div>
+      <div class="chip">Ảnh không bị tải lên</div>
+    </div>
+    <div class="cta">Link ở bio</div>
+    <div class="url" id="end-url"></div>
+    <div class="fine">Chỉ là một bài toán hình học — không phải thước đo nhan sắc.</div>
+  </div>
+
+  <script>
+    // ---- faint golden spiral in the backdrop ------------------------------------------------
+    {
+      const PHI = (1 + Math.sqrt(5)) / 2
+      const pts = []
+      for (let th = -3.2 * Math.PI; th < 3.4 * Math.PI; th += 0.05) {
+        const r = 34 * Math.pow(PHI, (2 * th) / Math.PI)
+        pts.push([930 + r * Math.cos(th), 330 - r * Math.sin(th)])
+      }
+      const d = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ')
+      document.getElementById('spiral').innerHTML =
+        `<path d="${d}" fill="none" stroke="rgba(232,189,85,0.13)" stroke-width="4" stroke-linecap="round"/>`
+    }
+
+    const $ = (id) => document.getElementById(id)
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+    window.stage = {
+      loadApp(url) {
+        return new Promise((resolve) => {
+          $('app').addEventListener('load', () => resolve(), { once: true })
+          $('app').src = url
+        })
+      },
+      async heading({ pill, title, caption }) {
+        const el = $('heading')
+        el.classList.add('out')
+        await sleep(280)
+        $('pill').textContent = pill
+        $('title').innerHTML = title
+        $('caption').textContent = caption
+        el.classList.remove('out')
+      },
+      caption(text) { $('caption').textContent = text },
+      finger(x, y, { instant = false } = {}) {
+        const f = $('finger')
+        f.classList.toggle('drag', instant)
+        f.style.left = x + 'px'
+        f.style.top = y + 'px'
+        f.classList.add('on')
+      },
+      fingerDown(on) { $('finger').classList.toggle('down', on) },
+      fingerHide() { $('finger').classList.remove('on') },
+      ripple(x, y) {
+        const r = document.createElement('div')
+        r.className = 'ripple'
+        r.style.left = x + 'px'
+        r.style.top = y + 'px'
+        document.body.appendChild(r)
+        setTimeout(() => r.remove(), 700)
+      },
+      ring(box, pad = 14) {
+        const el = $('ring')
+        if (!box) { el.classList.remove('on'); return }
+        el.style.left = box.x - pad + 'px'
+        el.style.top = box.y - pad + 'px'
+        el.style.width = box.width + pad * 2 + 'px'
+        el.style.height = box.height + pad * 2 + 'px'
+        el.classList.add('on')
+      },
+      demoTag(on) { $('demo-tag').classList.toggle('on', on) },
+      end(on, url) { if (url) $('end-url').textContent = url; $('end').classList.toggle('on', on) },
+    }
+  </script>
+</body>
+</html>
