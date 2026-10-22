@@ -21,6 +21,8 @@ test.describe('SEO and static hosting', () => {
     for (const [path, title] of [
       ['/analysis/', 'Analyze a Photo — GoldenFace'],
       ['/about/', 'About the Golden Ratio — GoldenFace'],
+      ['/blog/', 'Golden Ratio Blog — GoldenFace'],
+      ['/blog/golden-ratio-face/', "Golden Ratio Face: How It's Measured and Its Limits | GoldenFace"],
       ['/privacy/', 'Privacy Policy — GoldenFace'],
     ] as const) {
       const response = await request.get(path)
@@ -39,7 +41,7 @@ test.describe('SEO and static hosting', () => {
   })
 
   test('uses semantic landmarks and exactly one h1 per page', async ({ page }) => {
-    for (const path of ['/', '/analysis', '/about', '/privacy']) {
+    for (const path of ['/', '/analysis', '/about', '/blog', '/blog/golden-ratio-face', '/privacy']) {
       await page.goto(path)
       await expect(page.getByRole('banner')).toHaveCount(1)
       await expect(page.getByRole('main')).toHaveCount(1)

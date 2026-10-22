@@ -19,6 +19,7 @@ export const layout: typeof en = {
     home: 'Trang chủ',
     analysis: 'Phân tích',
     about: 'Về tỷ lệ vàng',
+    blog: 'Blog',
     privacy: 'Quyền riêng tư',
   },
   footer: {
@@ -29,6 +30,7 @@ export const layout: typeof en = {
     explore: 'Khám phá',
     analyze: 'Phân tích ảnh',
     about: 'Về tỷ lệ vàng',
+    blog: 'Blog',
     privacyPolicy: 'Chính sách quyền riêng tư',
     terms: 'Điều khoản sử dụng',
     goodToKnow: 'Cần lưu ý',

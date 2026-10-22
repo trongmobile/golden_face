@@ -53,7 +53,7 @@ describe('language comes from the URL', () => {
     const nav = screen.getAllByRole('navigation', { name: 'Điều hướng chính' })[0]!
     expect(within(nav).getByRole('link', { name: 'Trang chủ' })).toHaveAttribute('href', '/vi')
     expect(within(nav).getByRole('link', { name: 'Phân tích' })).toHaveAttribute('href', '/vi/analysis')
-    expect(within(nav).getByRole('link', { name: 'Quyền riêng tư' })).toHaveAttribute('href', '/vi/privacy')
+    expect(within(nav).getByRole('link', { name: 'Blog' })).toHaveAttribute('href', '/vi/blog')
     expect(screen.getByRole('link', { name: 'Trang chủ GoldenFace' })).toHaveAttribute('href', '/vi')
   })
 

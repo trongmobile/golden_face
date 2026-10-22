@@ -1,3 +1,4 @@
+import { BLOG_SLUGS, getPost } from '@/blog/posts'
 import { DEFAULT_LANG, LANGUAGES, translate } from '@/i18n/translate'
 import type { Lang, MsgKey } from '@/i18n/types'
 
@@ -8,20 +9,39 @@ import type { Lang, MsgKey } from '@/i18n/types'
  */
 
 /** The pages that are written to disk, one HTML file per language. `''` is the home page. */
-export const ROUTES = ['', 'analysis', 'about', 'privacy'] as const
-export type SeoRoute = (typeof ROUTES)[number]
+export const ROUTES: readonly string[] = [
+  '',
+  'analysis',
+  'about',
+  'blog',
+  ...BLOG_SLUGS.map((slug) => `blog/${slug}`),
+  'privacy',
+]
+/** A route of `ROUTES`: `''`, `about`, `blog`, `blog/<slug>`, … */
+export type SeoRoute = string
 
 export const PAGE_LANGS: readonly Lang[] = LANGUAGES.map((language) => language.code)
 
-const META_KEYS: Record<SeoRoute, { title: MsgKey; description: MsgKey }> = {
+const META_KEYS: Record<string, { title: MsgKey; description: MsgKey }> = {
   '': { title: 'home.metaTitle', description: 'home.metaDescription' },
   analysis: { title: 'analysisPage.meta.title', description: 'analysisPage.meta.description' },
   about: { title: 'about.metaTitle', description: 'about.metaDescription' },
+  blog: { title: 'blog.metaTitle', description: 'blog.metaDescription' },
   privacy: { title: 'privacy.metaTitle', description: 'privacy.metaDescription' },
 }
 
+const POST_PREFIX = 'blog/'
+
+/** The post a route shows, or `undefined` for every other route. */
+function postFor(lang: Lang, route: SeoRoute) {
+  return route.startsWith(POST_PREFIX) ? getPost(lang, route.slice(POST_PREFIX.length)) : undefined
+}
+
 export function routeMeta(lang: Lang, route: SeoRoute): { title: string; description: string } {
+  const post = postFor(lang, route)
+  if (post) return { title: post.metaTitle, description: post.metaDescription }
   const keys = META_KEYS[route]
+  if (!keys) throw new Error(`No page metadata for route "${route}"`)
   return { title: translate(lang, keys.title), description: translate(lang, keys.description) }
 }
 
@@ -74,6 +94,25 @@ export function homeStructuredData(lang: Lang, siteUrl: string, description: str
   return JSON.stringify(data).replace(/</g, '\\u003c')
 }
 
+/** JSON-LD for a blog post. `<` is escaped so the text can never close the script tag. */
+export function articleStructuredData(lang: Lang, siteUrl: string, route: SeoRoute): string | undefined {
+  const post = postFor(lang, route)
+  if (!post) return undefined
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.metaDescription,
+    datePublished: post.published,
+    inLanguage: lang,
+    mainEntityOfPage: pageUrl(siteUrl, lang, route),
+    image: `${siteUrl}/og-image.png`,
+    author: { '@type': 'Organization', name: 'GoldenFace' },
+    publisher: { '@type': 'Organization', name: 'GoldenFace' },
+  }
+  return JSON.stringify(data).replace(/</g, '\\u003c')
+}
+
 /** `<link>` / `<meta>` tags that need absolute URLs, so they are only written when the site URL is known. */
 export function headLinks(siteUrl: string, lang: Lang, route: SeoRoute, description: string): string {
   const url = escapeHtml(pageUrl(siteUrl, lang, route))
@@ -92,6 +131,8 @@ export function headLinks(siteUrl: string, lang: Lang, route: SeoRoute, descript
   if (route === '') {
     lines.push(`<script type="application/ld+json">${homeStructuredData(lang, siteUrl, description)}</script>`)
   }
+  const article = articleStructuredData(lang, siteUrl, route)
+  if (article) lines.push(`<script type="application/ld+json">${article}</script>`)
   return lines.map((line) => `    ${line}`).join('\n')
 }
 
@@ -119,6 +160,7 @@ export function applyPage(template: string, { lang, route, body, siteUrl }: Page
   html = setMeta(html, 'property', 'og:description', description)
   html = setMeta(html, 'name', 'twitter:title', title)
   html = setMeta(html, 'name', 'twitter:description', description)
+  if (postFor(lang, route)) html = setMeta(html, 'property', 'og:type', 'article')
   if (siteUrl) {
     html = html.replace('</head>', () => `${headLinks(siteUrl, lang, route, description)}\n  </head>`)
   }

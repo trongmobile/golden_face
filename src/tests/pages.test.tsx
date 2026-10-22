@@ -76,14 +76,14 @@ describe('home page', () => {
 })
 
 describe('layout and navigation', () => {
-  it('offers the four required navigation links', () => {
+  it('offers the main navigation links', () => {
     renderApp('/')
     const nav = screen.getByRole('navigation', { name: 'Primary' })
     for (const [name, href] of [
       ['Home', '/'],
       ['Analysis', '/analysis'],
       ['About Golden Ratio', '/about'],
-      ['Privacy', '/privacy'],
+      ['Blog', '/blog'],
     ] as const) {
       expect(within(nav).getByRole('link', { name })).toHaveAttribute('href', href)
     }
@@ -111,8 +111,8 @@ describe('layout and navigation', () => {
     await user.keyboard('{Escape}')
     expect(mobile).not.toBeVisible()
     await user.click(screen.getByRole('button', { name: 'Open menu' }))
-    await user.click(within(mobile).getByRole('link', { name: 'Privacy' }))
-    expect(await screen.findByRole('heading', { level: 1, name: /stays on your device/ })).toBeInTheDocument()
+    await user.click(within(mobile).getByRole('link', { name: 'About Golden Ratio' }))
+    expect(await screen.findByRole('heading', { level: 1, name: /famous number/ })).toBeInTheDocument()
     expect(mobile).not.toBeVisible()
   })
 

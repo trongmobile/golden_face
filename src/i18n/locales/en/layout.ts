@@ -17,6 +17,7 @@ export const layout = {
     home: 'Home',
     analysis: 'Analysis',
     about: 'About Golden Ratio',
+    blog: 'Blog',
     privacy: 'Privacy',
   },
   footer: {
@@ -27,6 +28,7 @@ export const layout = {
     explore: 'Explore',
     analyze: 'Analyze a photo',
     about: 'About the golden ratio',
+    blog: 'Blog',
     privacyPolicy: 'Privacy policy',
     terms: 'Terms of use',
     goodToKnow: 'Good to know',

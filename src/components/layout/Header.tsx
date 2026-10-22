@@ -10,7 +10,7 @@ const NAV_ITEMS: readonly { to: string; label: MsgKey; end: boolean }[] = [
   { to: '/', label: 'layout.nav.home', end: true },
   { to: '/analysis', label: 'layout.nav.analysis', end: false },
   { to: '/about', label: 'layout.nav.about', end: false },
-  { to: '/privacy', label: 'layout.nav.privacy', end: false },
+  { to: '/blog', label: 'layout.nav.blog', end: false },
 ]
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>

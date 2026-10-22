@@ -50,7 +50,7 @@ test.describe('home page', () => {
     for (const [name, title, url] of [
       ['Analysis', 'Analyze a Photo — GoldenFace', '/analysis'],
       ['About Golden Ratio', 'About the Golden Ratio — GoldenFace', '/about'],
-      ['Privacy', 'Privacy Policy — GoldenFace', '/privacy'],
+      ['Blog', 'Golden Ratio Blog — GoldenFace', '/blog'],
       ['Home', 'GoldenFace — Golden Ratio Face Analyzer', '/'],
     ] as const) {
       if (isMobile) await page.getByRole('button', { name: 'Open menu' }).click()
@@ -77,7 +77,7 @@ test.describe('home page', () => {
 
 test.describe('responsive layout', () => {
   for (const width of [320, 375, 768, 1024, 1440]) {
-    for (const path of ['/', '/analysis', '/about', '/privacy']) {
+    for (const path of ['/', '/analysis', '/about', '/blog', '/blog/golden-ratio-face', '/privacy']) {
       test(`${path} has no horizontal scrolling at ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 })
         await page.goto(path)

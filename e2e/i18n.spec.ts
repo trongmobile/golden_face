@@ -10,7 +10,7 @@ const storage = (page: Page) =>
     databases: (await indexedDB.databases?.())?.length ?? 0,
   }))
 
-const ROUTES = ['/', '/analysis', '/about', '/privacy'] as const
+const ROUTES = ['/', '/analysis', '/about', '/blog', '/blog/golden-ratio-face', '/privacy'] as const
 const vi = (route: string) => (route === '/' ? '/vi' : `/vi${route}`)
 
 test.describe('languages have their own addresses', () => {
@@ -33,14 +33,13 @@ test.describe('languages have their own addresses', () => {
     expect(await storage(page)).toEqual({ local: 0, session: 0, cookies: '', databases: 0 })
   })
 
-  test('every link keeps you in your language', async ({ page, isMobile }) => {
+  test('every link keeps you in your language', async ({ page }) => {
     await page.goto('/vi')
     await page.getByRole('link', { name: 'Tải ảnh lên' }).first().click()
     await expect(page).toHaveURL(/\/vi\/analysis\?source=upload/)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Phân tích ảnh')
 
-    if (isMobile) await page.getByRole('button', { name: 'Mở menu' }).click()
-    await page.getByRole('link', { name: 'Quyền riêng tư' }).first().click()
+    await page.getByRole('contentinfo').getByRole('link', { name: 'Chính sách quyền riêng tư' }).click()
     await expect(page).toHaveURL(/\/vi\/privacy$/)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ảnh của bạn ở lại trên thiết bị của bạn')
     await expect(page).toHaveTitle('Chính sách quyền riêng tư — GoldenFace')

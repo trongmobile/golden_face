@@ -2,6 +2,7 @@ import type { Dict } from '../../types'
 import { about } from './about'
 import { analysisErrors } from './analysisErrors'
 import { analysisPage } from './analysisPage'
+import { blog } from './blog'
 import { camera } from './camera'
 import { common } from './common'
 import { home } from './home'
@@ -18,6 +19,7 @@ export const vi: Dict = {
   layout,
   home,
   about,
+  blog,
   privacy,
   notFound,
   metrics,

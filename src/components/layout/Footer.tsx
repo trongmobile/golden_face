@@ -32,6 +32,11 @@ export function Footer() {
               </Link>
             </li>
             <li>
+              <Link className="text-muted hover:text-ink" to="/blog">
+                {t('layout.footer.blog')}
+              </Link>
+            </li>
+            <li>
               <Link className="text-muted hover:text-ink" to="/privacy">
                 {t('layout.footer.privacyPolicy')}
               </Link>

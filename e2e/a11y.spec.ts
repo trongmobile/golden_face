@@ -16,6 +16,9 @@ test.describe('accessibility (axe, WCAG 2.1 A/AA)', () => {
     ['home', '/'],
     ['analysis', '/analysis'],
     ['about', '/about'],
+    ['blog', '/blog'],
+    ['blog article', '/blog/golden-ratio-face'],
+    ['blog article (Vietnamese)', '/vi/blog/golden-ratio-face'],
     ['privacy', '/privacy'],
     ['not found', '/nothing-here'],
   ] as const) {

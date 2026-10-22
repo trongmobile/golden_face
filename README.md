@@ -24,6 +24,7 @@ golden ratio (φ ≈ 1.618) — as a piece of geometry, not as a judgement of pe
 - [Architecture](#architecture)
 - [Privacy](#privacy)
 - [Languages](#languages)
+- [Blog](#blog)
 - [SEO](#seo)
 - [Deploying](#deploying)
 - [Testing](#testing)
@@ -170,7 +171,8 @@ src/
   i18n/                  translations (locales/en, locales/vi), useI18n(), language-aware links and URLs
   seo/                   titles, canonical/hreflang, JSON-LD, sitemap (pure functions used by the build)
   entry-server.tsx       renders a page to HTML at build time (see SEO)
-  pages/                 Home, Analysis, About, Privacy, NotFound
+  pages/                 Home, Analysis, About, Blog, BlogPost, Privacy, NotFound
+  blog/                  loads and renders the markdown posts (posts.ts, Markdown.tsx)
   features/
     camera/              useCamera hook, camera errors, CameraModal
     image-upload/        validation, decoding, rotate/crop, dropzone, editor
@@ -187,6 +189,7 @@ src/
   types/                 shared TypeScript types
   utils/                 small helpers
   tests/                 Vitest tests
+content/blog/<lang>/     blog posts as markdown, one file per language (see Blog)
 e2e/                     Playwright tests
 scripts/                 asset preparation, prerender.mjs (writes the finished pages)
 ```
@@ -264,6 +267,25 @@ src/i18n/
    `<tags>` match the English text.
 
 The header shows one button per language, which suits two or three; with more, replace `LanguageSwitcher` by a menu.
+
+## Blog
+
+Posts are markdown files, one per language, with the same file name and `slug`:
+
+```
+content/blog/en/golden-ratio-face.md
+content/blog/vi/golden-ratio-face.md
+```
+
+Each file starts with front matter (`slug`, `title`, `meta_title`, `meta_description`, `published: YYYY-MM-DD`; other keys are
+authoring notes and are ignored) followed by the article, which starts with a single `# Heading`. Links that start
+with `/` (for example `/analysis`) are routed and keep the visitor's language; raw HTML is not interpreted. Tables
+(GFM) are supported.
+
+A post is published only when it exists in **every** language, so the language switch and `hreflang` always have a
+counterpart. Publishing needs no other change: the build pre-renders `/blog/<slug>/` and `/vi/blog/<slug>/`, lists them on
+`/blog`, puts them in `sitemap.xml` with their alternates and adds `Article` structured data. Keep `meta_title` at 70
+characters or fewer, `meta_description` between 50 and 200, and avoid `&` in titles (the tests check this).
 
 ## SEO
 

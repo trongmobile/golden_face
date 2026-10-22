@@ -8,6 +8,8 @@ import { HomePage } from '@/pages/Home'
 // loaded even later, only when the user starts an analysis.
 const AnalysisPage = lazy(() => import('@/pages/Analysis').then((m) => ({ default: m.AnalysisPage })))
 const AboutPage = lazy(() => import('@/pages/About').then((m) => ({ default: m.AboutPage })))
+const BlogPage = lazy(() => import('@/pages/Blog').then((m) => ({ default: m.BlogPage })))
+const BlogPostPage = lazy(() => import('@/pages/BlogPost').then((m) => ({ default: m.BlogPostPage })))
 const PrivacyPage = lazy(() => import('@/pages/Privacy').then((m) => ({ default: m.PrivacyPage })))
 const NotFoundPage = lazy(() => import('@/pages/NotFound').then((m) => ({ default: m.NotFoundPage })))
 
@@ -28,6 +30,8 @@ export function AppRoutes() {
         <Route index element={<HomePage />} />
         <Route path="analysis" element={<AnalysisPage />} />
         <Route path="about" element={<AboutPage />} />
+        <Route path="blog" element={<BlogPage />} />
+        <Route path="blog/:slug" element={<BlogPostPage />} />
         <Route path="privacy" element={<PrivacyPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

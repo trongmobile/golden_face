@@ -23,3 +23,8 @@ export function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
+
+/** A `YYYY-MM-DD` date in the reader's language, e.g. "October 22, 2026". UTC, so the server and the browser print the same text. */
+export function formatDate(date: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`))
+}
